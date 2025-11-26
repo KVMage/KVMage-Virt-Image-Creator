@@ -1,0 +1,21 @@
+---
+kvmage:
+  debian-install:
+    virt_mode: install
+    image_name: debian_src
+    os_var: debiantesting
+    image_size: 100G
+    install_file: ./preseed.cfg
+    install_media: ./debain.iso
+    image_dest: .
+    hostname: debian
+    firmware: efi
+  debain-customize:
+    virt_mode: customize
+    image_name: debian
+    os_var: debiantesting
+    image_src: ./debian_src.qcow2
+    image_dest: .
+    hostname: debian
+    custom_script: script.sh
+    firmware: efi
