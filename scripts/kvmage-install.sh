@@ -28,7 +28,7 @@ case "$ARCH" in
     ;;
 esac
 
-BINARY_PATH="dist/${BINARY_NAME}-${OS}-${ARCH}"
+BINARY_PATH="${DIST_DIR}/${BINARY_NAME}-${OS}-${ARCH}"
 
 if [[ ! -f "$BINARY_PATH" ]]; then
   echo "Binary not found at $BINARY_PATH"
