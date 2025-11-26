@@ -6,8 +6,10 @@ REPO_URL="https://gitlab.com/kvmage/kvmage.git"
 REPO_NAME="kvmage"
 SCRIPTS_DIR="scripts"
 
-echo "[*] Cloning repository..."
 rm -rf "${REPO_NAME}"
+echo "Cleaning residual artifacts"
+
+echo "[*] Cloning repository..."
 git clone "${REPO_URL}"
 
 echo "[*] Entering repo directory..."
