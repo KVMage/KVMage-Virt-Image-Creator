@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-REPO_URL="https://gitlab.ctos.io/code/kvmage-virt-image-creator.git"
+REPO_URL="https://gitlab.com/kvmage/kvmage.git"
 REPO_DIR="kvmage-virt-image-creator"
 
 echo "[*] Cloning repository..."

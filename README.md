@@ -28,21 +28,21 @@ Here are a few ways that you are able to install
 Use `git clone` to download the repo locally:
 
 ``` Bash
-git clone https://gitlab.ctos.io/code/kvmage-virt-image-creator.git
+git clone https://gitlab.com/kvmage/kvmage.git
 ```
 
 ``` Bash
-cd kvmage-virt-image-creator
+cd kvmage
 mkdir -p dist
 bash build.sh
 bash install.sh
 cd ..
-rm -rf kvmage-virt-image-creator
+rm -rf kvmage
 ```
 
 Autoinstall script
 ```
-bash <(curl -s https://gitlab.ctos.io/code/kvmage-virt-image-creator/-/raw/main/autoinstall.sh)
+bash <(curl -s https://gitlab.com/kvmage/kvmage/-/blob/main/autoinstall.sh)
 ```
 
 ## How to Use KVMage
