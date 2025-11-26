@@ -9,6 +9,11 @@ VERSION_FILE="VERSION"
 # Allow override of install directory via env var INSTALL_DIR
 INSTALL_DIR="${INSTALL_DIR:-$DEFAULT_INSTALL_DIR}"
 
+# Find repo root
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+DIST_DIR="${REPO_ROOT}/dist"
+VERSION_FILE="${REPO_ROOT}/VERSION"
+
 # Detect platform
 OS=$(uname | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)

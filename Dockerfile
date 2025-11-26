@@ -1,8 +1,12 @@
-FROM ghcr.io/almalinux/almalinux:9.6-minimal-20251117
+ARG ALMA_VERSION=9.6
+ARG ALMA_TAG_DATE=20251117
 
+FROM ghcr.io/almalinux/almalinux:${ALMA_VERSION}-minimal-${ALMA_TAG_DATE}
+
+ARG ALMA_VERSION
 ARG KVMAGE_VERSION
 ARG BUILD_DATE
-ARG RELEASEVER=9.6
+ARG RELEASEVER
 
 LABEL maintainer="KVMage"
 LABEL org.opencontainers.image.title="KVMage: Virt Image Builder" \
@@ -10,7 +14,8 @@ LABEL org.opencontainers.image.title="KVMage: Virt Image Builder" \
       org.opencontainers.image.version="${KVMAGE_VERSION}" \
       org.opencontainers.image.created="${BUILD_DATE}"
 
-RUN echo "${RELEASEVER}" > /etc/dnf/vars/releasever
+RUN : echo "${RELEASEVER:=${ALMA_VERSION}}" && \
+    echo "${RELEASEVER}" > /etc/dnf/vars/releasever
 
 # System packages
 RUN microdnf update -y && \

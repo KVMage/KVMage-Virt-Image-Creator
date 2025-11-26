@@ -3,13 +3,13 @@
 set -euo pipefail
 
 REPO_URL="https://gitlab.com/kvmage/kvmage.git"
-REPO_DIR="kvmage-virt-image-creator"
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
 echo "[*] Cloning repository..."
 git clone "$REPO_URL"
 
 echo "[*] Entering repo directory..."
-cd "$REPO_DIR"
+cd "$REPO_ROOT"
 
 echo "[*] Creating dist directory..."
 mkdir -p dist
@@ -22,6 +22,6 @@ bash install.sh
 
 echo "[*] Cleaning up..."
 cd ..
-rm -rf "$REPO_DIR"
+rm -rf "$REPO_ROOT"
 
 echo "[*] Done."

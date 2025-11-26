@@ -2,7 +2,9 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 DIST_DIR="${SCRIPT_DIR}/dist"
 VERSION="$(cat "${SCRIPT_DIR}/VERSION")"
 
