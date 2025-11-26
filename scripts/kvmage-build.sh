@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel)"
 
 DIST_DIR="${SCRIPT_DIR}/dist"
 VERSION="$(cat "${SCRIPT_DIR}/VERSION")"

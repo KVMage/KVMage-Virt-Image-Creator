@@ -3,7 +3,8 @@
 set -euo pipefail
 
 REPO_URL="https://gitlab.com/kvmage/kvmage.git"
-REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel)"
 SCRIPTS_DIR="${REPO_ROOT}/scripts"
 
 echo "[*] Cloning repository..."
