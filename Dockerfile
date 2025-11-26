@@ -1,7 +1,8 @@
+ARG CONTAINER_NAME=9-minimal
 ARG ALMA_VERSION=9.6
 ARG ALMA_TAG_DATE=20251117
 
-FROM ghcr.io/almalinux/almalinux:${ALMA_VERSION}-minimal-${ALMA_TAG_DATE}
+FROM ghcr.io/almalinux/${CONTAINER_NAME}:${ALMA_VERSION}-${ALMA_TAG_DATE}
 
 ARG ALMA_VERSION
 ARG KVMAGE_VERSION
@@ -41,6 +42,9 @@ RUN microdnf update -y && \
         which \
         xz && \
     microdnf clean all
+
+# Install KVMage
+RUN bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/main/scripts/autoinstall.sh)
 
 # Configure secure_path
 RUN echo 'Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"' \
