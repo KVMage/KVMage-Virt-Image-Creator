@@ -11,7 +11,7 @@ rm -rf "${REPO_NAME}"
 git clone "${REPO_URL}"
 
 echo "[*] Entering repo directory..."
-cd "${REPO_ROOT}"
+cd "${REPO_NAME}"
 
 echo "[*] Creating dist directory..."
 mkdir -p dist
@@ -24,6 +24,6 @@ bash "${SCRIPTS_DIR}/kvmage-install.sh"
 
 echo "[*] Cleaning up..."
 cd ..
-rm -rf "${REPO_ROOT}"
+rm -rf "${REPO_NAME}"
 
 echo "[*] Done."
