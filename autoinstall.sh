@@ -7,7 +7,7 @@ REPO_NAME="kvmage"
 SCRIPTS_DIR="scripts"
 
 rm -rf "${REPO_NAME}"
-echo "Cleaning residual artifacts"
+echo "[*] Cleaning residual artifacts"
 
 echo "[*] Cloning repository..."
 git clone "${REPO_URL}"
