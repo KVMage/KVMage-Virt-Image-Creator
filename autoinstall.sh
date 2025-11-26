@@ -15,10 +15,10 @@ echo "[*] Creating dist directory..."
 mkdir -p dist
 
 echo "[*] Running build.sh..."
-bash build.sh
+bash scripts/kvmage-build.sh
 
 echo "[*] Running install.sh..."
-bash install.sh
+bash scripts/kvmage-install.sh
 
 echo "[*] Cleaning up..."
 cd ..
