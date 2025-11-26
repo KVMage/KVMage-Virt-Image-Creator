@@ -4,6 +4,7 @@ set -euo pipefail
 
 REPO_URL="https://gitlab.com/kvmage/kvmage.git"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+SCRIPTS_DIR="${REPO_ROOT}/scripts"
 
 echo "[*] Cloning repository..."
 git clone "$REPO_URL"
@@ -15,10 +16,10 @@ echo "[*] Creating dist directory..."
 mkdir -p dist
 
 echo "[*] Running build.sh..."
-bash scripts/kvmage-build.sh
+bash $SCRIPTS_DIR/kvmage-build.sh
 
 echo "[*] Running install.sh..."
-bash scripts/kvmage-install.sh
+bash $SCRIPTS_DIR/kvmage-install.sh
 
 echo "[*] Cleaning up..."
 cd ..
