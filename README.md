@@ -42,7 +42,7 @@ rm -rf kvmage
 
 Autoinstall script
 ```
-bash <(curl -s https://gitlab.com/kvmage/kvmage/-/blob/main/autoinstall.sh)
+bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/main/autoinstall.sh)
 ```
 
 ## How to Use KVMage
