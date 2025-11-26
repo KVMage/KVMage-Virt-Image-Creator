@@ -37,6 +37,12 @@ RUN microdnf update -y && \
         xz && \
     microdnf clean all
 
+# Configure secure_path
+RUN echo 'Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"' \
+    > /etc/sudoers.d/10-secure-path && \
+    chmod 0440 /etc/sudoers.d/10-secure-path
+
+
 # Custom tool installation script
 COPY autoinstall.sh /usr/local/bin/autoinstall.sh
 RUN chmod +x /usr/local/bin/autoinstall.sh && \
