@@ -18,10 +18,10 @@ cd "${REPO_NAME}"
 echo "[*] Creating dist directory..."
 mkdir -p dist
 
-echo "[*] Running build.sh..."
+echo "[*] Running kvmage-build.sh..."
 bash "${SCRIPTS_DIR}/kvmage-build.sh"
 
-echo "[*] Running install.sh..."
+echo "[*] Running kvmage-install.sh..."
 bash "${SCRIPTS_DIR}/kvmage-install.sh"
 
 echo "[*] Cleaning up..."
