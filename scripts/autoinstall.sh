@@ -15,9 +15,6 @@ git clone "${REPO_URL}"
 echo "[*] Entering repo directory..."
 cd "${REPO_NAME}"
 
-echo "[*] Creating dist directory..."
-mkdir -p dist
-
 echo "[*] Running kvmage-build.sh..."
 bash "${SCRIPTS_DIR}/kvmage-build.sh"
 
