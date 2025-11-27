@@ -14,3 +14,7 @@ docker build \
   --build-arg BUILD_DATE="${BUILD_DATE}" \
   -t "kvmage:${KVMAGE_VERSION}" \
   "${REPO_ROOT}"
+
+
+echo "[INFO] Tagging kvmage:${KVMAGE_VERSION} as latest"
+docker tag "kvmage:${KVMAGE_VERSION}" "kvmage:latest"
