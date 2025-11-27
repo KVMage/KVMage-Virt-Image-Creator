@@ -156,3 +156,23 @@ kvamge [command]
 -D, --image-dest <dest_qcow> | image_dest: <dest_qcow>
 -W, --network <iface> | network: <iface> (optional)
 ```
+
+## Docker Container Usage
+
+KVMage comes packaged as a container for easy image generation in CI/CD pipelines.
+
+Since KVM requires kernel level access (hence the "K" in KVM) you need to pass through certain parameters from the container to the host.
+
+Below is an example of what you want to execute:
+
+```bash
+sudo docker run --rm -it \
+  --privileged \
+  --device /dev/kvm \
+  -v kvmage:/kvmage \
+  -v /var/run/libvirt:/var/run/libvirt \
+  -v /var/lib/libvirt:/var/lib/libvirt \
+  kvmage:latest \
+  install --config kvmage.yml
+
+```

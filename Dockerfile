@@ -51,4 +51,5 @@ WORKDIR /kvmage
 
 ENV LIBGUESTFS_BACKEND=direct
 
-CMD ["/bin/bash"]
+ENTRYPOINT ["kvmage"]
+CMD ["--help"]
