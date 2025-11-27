@@ -39,6 +39,7 @@ RUN microdnf update -y && \
         virt-top \
         virt-viewer \
         vim \
+        wget \
         which \
         xz && \
     microdnf clean all
