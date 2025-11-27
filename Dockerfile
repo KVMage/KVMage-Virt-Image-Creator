@@ -47,10 +47,6 @@ RUN microdnf update -y && \
 # Install KVMage
 RUN bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/main/scripts/autoinstall.sh)
 
-# Configure secure_path
-RUN echo 'Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"' | tee /etc/sudoers.d/10-secure-path >/dev/null && \
-    chmod 0440 /etc/sudoers.d/10-secure-path
-
 WORKDIR /kvmage
 
 ENV LIBGUESTFS_BACKEND=direct
