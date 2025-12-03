@@ -17,7 +17,7 @@ func CustomHelp(cmd *cobra.Command, args []string) {
 	Print("  -f, --config <file>           Use a YAML config file")
 	Print("")
 	Print("Installation Methods (required):")
-	Print("  -i, --install                 Install mode (create image from ISO)")
+	Print("  -i, --install                 Install mode (create image from install media)")
 	Print("  -c, --customize               Customize mode (modify existing image)")
 	Print("")
 	Print("Image Options:")

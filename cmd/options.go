@@ -14,7 +14,7 @@ type Options struct {
 	ImageSize        string `yaml:"image_size"`                // e.g., "100G"
 	ImagePartition   string `yaml:"image_part"`                // e.g. "/dev/sda1"
 	InstallFile      string `yaml:"install_file" file:"true"`  // Path to auto install file
-	ISOFile          string `yaml:"iso_file" file:"true"`      // Local ISO file path
+	InstallMedia     string `yaml:"install_media" file:"true"` // Install media path or URL
 	RepoURL          string `yaml:"repo_url"`                  // Remote repo URL
 	ImageSource      string `yaml:"image_src" file:"true"`     // Source QCOW2 image (customize mode)
 	ImageDestination string `yaml:"image_dest" file:"true"`    // Output QCOW2 image
