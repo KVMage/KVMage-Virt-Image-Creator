@@ -35,7 +35,6 @@ func init() {
 	rootCmd.Flags().StringVarP(&opts.ImageSize, "image-size", "s", "", "Image size")
 	rootCmd.Flags().StringVarP(&opts.ImagePartition, "image-part", "P", "", "Partition to expand inside image (e.g. /dev/sda1)")
 	rootCmd.Flags().StringVarP(&opts.InstallMedia, "install-media", "j", "", "Path to local or remote ISO file or install tree")
-	rootCmd.Flags().StringVarP(&opts.RepoURL, "repo-url", "l", "", "Installation repository URL (e.g. https://repo.almalinux.org/...)")
 	rootCmd.Flags().StringVarP(&opts.InstallFile, "install-file", "k", "", "Install file path")
 	rootCmd.Flags().StringVarP(&opts.ImageSource, "image-src", "S", "", "Source qcow2 image")
 	rootCmd.Flags().StringVarP(&opts.ImageDestination, "image-dest", "D", "", "Destination qcow2 image")
