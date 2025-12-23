@@ -7,6 +7,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel)"
 
 DIST_DIR="${REPO_ROOT}/dist"
 VERSION="$(cat "${REPO_ROOT}/VERSION")"
+REQUIREMENTS="$(base64 -w 0 "${REPO_ROOT}/REQUIREMENTS")"
 
 mkdir -p "$DIST_DIR"
 
