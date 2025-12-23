@@ -62,42 +62,59 @@ func CreateTempImage(opts *Options) (string, string, error) {
 	return TempImageName, TempImagePath, nil
 }
 
-func resolveRemoteISO(src string) (string, error) {
+func resolveInstallMedia(src string) (string, error) {
 	if strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://") {
-		filename := filepath.Base(src)
-		dest := filepath.Join(os.TempDir(), filename)
+		if strings.HasSuffix(strings.ToLower(src), ".iso") {
+			filename := filepath.Base(src)
+			dest := filepath.Join(os.TempDir(), filename)
 
-		if _, err := os.Stat(dest); err == nil {
-			PrintVerbose(2, "Using cached remote ISO: %s", dest)
+			if _, err := os.Stat(dest); err == nil {
+				PrintVerbose(2, "Using cached remote ISO: %s", dest)
+				return dest, nil
+			}
+
+			var downloader string
+			if _, err := exec.LookPath("curl"); err == nil {
+				downloader = "curl"
+			} else if _, err := exec.LookPath("wget"); err == nil {
+				downloader = "wget"
+			} else {
+				return "", fmt.Errorf("neither curl nor wget is installed")
+			}
+
+			PrintVerbose(2, "Downloading ISO from %s using %s", src, downloader)
+
+			var cmd *exec.Cmd
+			if downloader == "curl" {
+				cmd = exec.Command("curl", "-L", "-v", "-o", dest, src)
+			} else {
+				cmd = exec.Command("wget", "-v", "-O", dest, src)
+			}
+
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+
+			if err := cmd.Run(); err != nil {
+				return "", fmt.Errorf("failed to download remote ISO: %w", err)
+			}
+
 			return dest, nil
-		}
-
-		var downloader string
-		if _, err := exec.LookPath("curl"); err == nil {
-			downloader = "curl"
-		} else if _, err := exec.LookPath("wget"); err == nil {
-			downloader = "wget"
 		} else {
-			return "", fmt.Errorf("neither curl nor wget is installed")
+			return src, nil
 		}
+	}
 
-		PrintVerbose(2, "Downloading ISO from %s using %s", src, downloader)
+	info, err := os.Stat(src)
+	if err != nil {
+		return "", fmt.Errorf("cannot access install media: %w", err)
+	}
 
-		var cmd *exec.Cmd
-		if downloader == "curl" {
-			cmd = exec.Command("curl", "-L", "-v", "-o", dest, src)
-		} else {
-			cmd = exec.Command("wget", "-v", "-O", dest, src)
+	if info.IsDir() {
+		absPath, err := filepath.Abs(src)
+		if err != nil {
+			return "", err
 		}
-
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Run(); err != nil {
-			return "", fmt.Errorf("failed to download remote ISO: %w", err)
-		}
-
-		return dest, nil
+		return absPath, nil
 	}
 
 	return src, nil
@@ -142,17 +159,23 @@ func CopyInputFilesToTempDir(opts *Options) error {
 		return fmt.Errorf("auto install file copy failed: %w", err)
 	}
 
-	if opts.ISOFile != "" {
+	if opts.InstallMedia != "" {
 		var resolved string
-		if resolved, err = resolveRemoteISO(opts.ISOFile); err != nil {
-			return fmt.Errorf("ISO resolution failed: %w", err)
+		if resolved, err = resolveInstallMedia(opts.InstallMedia); err != nil {
+			return fmt.Errorf("install media resolution failed: %w", err)
 		}
-		if TempInstallMedia, err = copyToTemp(resolved, "iso"); err != nil {
-			return fmt.Errorf("iso file copy failed: %w", err)
+
+		if strings.HasPrefix(resolved, "http://") || strings.HasPrefix(resolved, "https://") {
+			TempInstallMedia = resolved
+			PrintVerbose(2, "Using remote install media: %s", TempInstallMedia)
+		} else if info, err := os.Stat(resolved); err == nil && info.IsDir() {
+			TempInstallMedia = resolved
+			PrintVerbose(2, "Using local install tree: %s", TempInstallMedia)
+		} else {
+			if TempInstallMedia, err = copyToTemp(resolved, "iso"); err != nil {
+				return fmt.Errorf("install media copy failed: %w", err)
+			}
 		}
-	} else if opts.RepoURL != "" {
-		TempInstallMedia = opts.RepoURL
-		PrintVerbose(2, "Using repo URL as install media: %s", TempInstallMedia)
 	}
 
 	if TempImageSource, err = copyToTemp(opts.ImageSource, "src"); err != nil {

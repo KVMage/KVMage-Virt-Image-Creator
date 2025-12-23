@@ -10,8 +10,7 @@ var fieldLabels = map[string]string{
 	"OSVariant":        "os_var",
 	"ImageSize":        "image_size",
 	"InstallFile":      "install_file",
-	"ISOFile":          "iso_file",
-	"RepoURL":          "repo_url",
+	"InstallMedia":     "install_media",
 	"ImageSource":      "image_src",
 	"ImageDestination": "image_dest",
 }
@@ -43,14 +42,11 @@ func ValidateOptions(opts *Options) error {
 	}
 
 	if mode == "install" {
-		hasISO := opts.ISOFile != ""
-		hasRepo := opts.RepoURL != ""
+		hasInstallMedia := opts.InstallMedia != ""
 
 		switch {
-		case !hasISO && !hasRepo:
-			missing = append(missing, "iso_file or repo_url")
-		case hasISO && hasRepo:
-			return fmt.Errorf("only one of iso_file or repo_url may be specified, not both")
+		case !hasInstallMedia:
+			missing = append(missing, "install_media")
 		}
 	}
 

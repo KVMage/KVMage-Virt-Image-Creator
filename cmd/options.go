@@ -29,6 +29,9 @@ func resolvePath(path string) string {
 	if path == "" || filepath.IsAbs(path) {
 		return path
 	}
+	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
+		return path
+	}
 	cwd, err := os.Getwd()
 	if err != nil {
 		return path
