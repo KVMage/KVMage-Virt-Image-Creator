@@ -3,11 +3,12 @@ package cmd
 var opts = &Options{}
 
 var (
-	showVersion  bool
-	verboseLevel int
-	quiet        bool
-	uninstall    bool
-	cleanupOnly  bool
+	showVersion       bool
+	checkRequirements bool
+	verboseLevel      int
+	quiet             bool
+	uninstall         bool
+	cleanupOnly       bool
 
 	runMode    bool
 	configPath string
@@ -16,6 +17,7 @@ var (
 	customizeFlag bool
 )
 
+
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "V", false, "Show version and exit")
 	rootCmd.PersistentFlags().CountVarP(&verboseLevel, "verbose", "v", "Increase verbosity (-v, -vv, -vvv). Equivalent to --verbose-level=N")
@@ -23,6 +25,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress all output (overrides verbose)")
 	rootCmd.PersistentFlags().BoolVarP(&uninstall, "uninstall", "u", false, "Uninstall KVMage from /usr/local/bin")
 	rootCmd.PersistentFlags().BoolVarP(&cleanupOnly, "cleanup", "X", false, "Run cleanup mode to remove orphaned kvmage temp files")
+	rootCmd.PersistentFlags().BoolVarP(&checkRequirements, "check-requirements", "R", false, "Check system requirements and exit")
 
 	rootCmd.PersistentFlags().BoolVarP(&runMode, "run", "r", false, "Use CLI args to run KVMage")
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "f", "", "Path to YAML config file")
