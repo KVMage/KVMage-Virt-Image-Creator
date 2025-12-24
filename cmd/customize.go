@@ -82,6 +82,32 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 		args = append(args, "--run", TempCustomScript)
 		PrintVerbose(2, "Including custom script: %s", TempCustomScript)
 	}
+    for i, originalPath := range opts.Upload {
+    	tempPath := TempUploadPaths[i]
+    	vmPath := filepath.Join("/tmp/kvmage", originalPath)
+
+    	info, err := os.Stat(tempPath)
+    	if err != nil {
+    		return fmt.Errorf("failed to stat upload path %s: %w", originalPath, err)
+    	}
+		if info.IsDir() {
+			vmParent := filepath.Dir(vmPath)
+    		args = append(args, "--copy-in", fmt.Sprintf("%s:%s", tempPath, vmParent))
+    		PrintVerbose(2, "Uploading directory: %s -> %s", originalPath, vmPath)
+    	} else {
+			args = append(args, "--upload", fmt.Sprintf("%s:%s", tempPath, vmPath))
+   			PrintVerbose(2, "Uploading file: %s -> %s", originalPath, vmPath)
+   		}
+	}
+	for _, execPath := range opts.Execute {
+   		vmPath := filepath.Join("/tmp/kvmage", execPath)
+   		args = append(args, "--run", vmPath)
+   		PrintVerbose(2, "Will execute: %s", vmPath)
+   	}
+	if len(opts.Upload) > 0 {
+		args = append(args, "--run-command", "rm -rf /tmp/kvmage || true")
+		PrintVerbose(2, "Will cleanup /tmp/kvmage in VM")
+	}
 	if opts.Hostname != "" {
 		args = append(args, "--hostname", opts.Hostname)
 		PrintVerbose(2, "Setting hostname: %s", opts.Hostname)

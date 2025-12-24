@@ -10,12 +10,19 @@ kvmage:
     image_dest: .
     hostname: debian
     firmware: efi
-  debain-customize:
+  debian-customize:
     virt_mode: customize
     image_name: debian
     os_var: debiantesting
     image_src: ./debian_src.qcow2
     image_dest: .
     hostname: debian
-    custom_script: script.sh
+    files_dirs:
+      - file.sh
+      - /full/path/file
+      - /full/path/or/dir
+      - ./relative/path
+    execution_files:
+      - /full/path/file/execute_first.sh
+      - ./relative/path/execute_second.sh
     firmware: efi

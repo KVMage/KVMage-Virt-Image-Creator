@@ -14,9 +14,10 @@ func CleanupArtifacts() {
 		TempInstallFile,
 		TempInstallMedia,
 		TempImageSource,
-		TempCustomScript,
 	}
 
+	paths = append(paths, TempUploadPaths...)
+ 
 	for _, path := range paths {
 		if path == "" {
 			continue

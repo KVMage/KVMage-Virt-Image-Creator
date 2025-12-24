@@ -43,6 +43,8 @@ func init() {
 	rootCmd.Flags().StringVarP(&opts.ImageDestination, "image-dest", "D", "", "Destination qcow2 image")
 	rootCmd.Flags().StringVarP(&opts.Hostname, "hostname", "H", "", "Hostname (optional)")
 	rootCmd.Flags().StringVarP(&opts.CustomScript, "custom-script", "C", "", "Custom script (optional)")
+	rootCmd.Flags().StringSliceVarP(&opts.Upload, "upload", "U", []string{}, "Files or directories to upload (temp)")
+	rootCmd.Flags().StringSliceVarP(&opts.Execute, "execute", "E", []string{}, "Files to execute scripts (in order)")
 	rootCmd.Flags().StringVarP(&opts.Network, "network", "W", "", "Network interface (optional)")
 	rootCmd.Flags().StringVarP(&opts.Console, "console", "", "", "Console type: serial or graphical (optional)")
 	rootCmd.Flags().StringVarP(&opts.Firmware, "firmware", "m", "bios", "Firmware type: bios or efi")

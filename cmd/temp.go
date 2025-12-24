@@ -17,7 +17,7 @@ var (
 	TempInstallFile  string
 	TempInstallMedia string
 	TempImageSource  string
-	TempCustomScript string
+	TempUploadPaths  []string
 )
 
 const tempDir = "/var/lib/libvirt/images"
@@ -181,8 +181,13 @@ func CopyInputFilesToTempDir(opts *Options) error {
 	if TempImageSource, err = copyToTemp(opts.ImageSource, "src"); err != nil {
 		return fmt.Errorf("source image copy failed: %w", err)
 	}
-	if TempCustomScript, err = copyToTemp(opts.CustomScript, "custom"); err != nil {
-		return fmt.Errorf("custom script copy failed: %w", err)
+	for i, uploadPath := range opts.Upload {
+		label := fmt.Sprintf("upload-%d", i)
+		tempPath, err := copyToTemp(uploadPath, label)
+		if err != nil {
+			return fmt.Errorf("upload file copy failed for %s: %w", uploadPath, err)
+		}
+		TempUploadPaths = append(TempUploadPaths, tempPath)
 	}
 
 	return nil
