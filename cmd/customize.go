@@ -78,10 +78,6 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 	if verboseLevel >= 2 {
 		args = append(args, "-x")
 	}
-	if TempCustomScript != "" {
-		args = append(args, "--run", TempCustomScript)
-		PrintVerbose(2, "Including custom script: %s", TempCustomScript)
-	}
     for i, originalPath := range opts.Upload {
     	tempPath := TempUploadPaths[i]
     	vmPath := filepath.Join("/tmp/kvmage", originalPath)
