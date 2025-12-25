@@ -105,13 +105,19 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 			return fmt.Errorf("failed to stat upload path %s: %w", originalPath, err)
 		}
 		if info.IsDir() {
-			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmPath))
-			args = append(args, "--copy-in", fmt.Sprintf("%s:%s", tempUploadPath, vmPath))		 
+			baseName := filepath.Base(originalPath)
+			renamedTempPath := filepath.Join(filepath.Dir(tempUploadPath), baseName)
+			if err := os.Rename(tempUploadPath, renamedTempPath); err != nil {
+				return fmt.Errorf("failed to rename temp directory: %w", err)
+			}
+			vmParent := filepath.Dir(vmPath)
+			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmParent))
+			args = append(args, "--copy-in", fmt.Sprintf("%s:%s", renamedTempPath, vmParent))
 			PrintVerbose(2, "Uploading directory: %s -> %s", originalPath, vmPath)
 			uploadedDirs = append(uploadedDirs, originalPath)
 		} else {
 			vmParentDir := filepath.Dir(vmPath)
-			args = append(args, "--run-command", "mkdir -p /tmp/kvmage")
+			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmParentDir))
 			args = append(args, "--upload", fmt.Sprintf("%s:%s", tempUploadPath, vmPath))
 			PrintVerbose(2, "Uploading file: %s -> %s", originalPath, vmPath)
 		}
