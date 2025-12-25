@@ -137,6 +137,17 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 			}
 		}
 		if !isAlreadyUploaded {
+			for _, dir := range uploadedDirs {
+				candidatePath := filepath.Join(dir, execPath)
+				if _, err := os.Stat(candidatePath); err == nil {
+					isAlreadyUploaded = true
+					vmPath = filepath.Join("/tmp/kvmage", candidatePath)
+					PrintVerbose(2, "Execute file %s found inside uploaded directory %s", execPath, dir)
+					break
+				}
+			}
+		}
+		if !isAlreadyUploaded {
 			if _, err := os.Stat(execPath); err != nil {
 				return fmt.Errorf("execute file not found: %s: %w", execPath, err)
 			}
