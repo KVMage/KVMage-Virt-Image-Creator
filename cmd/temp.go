@@ -224,7 +224,66 @@ func copyToTempCustomDir(src string, label string, destDir string) (string, erro
 		}
 		return dest, nil
 	}
+
+	func copyDir(src string, dst string) error {
+		srcInfo, err := os.Stat(src)
+		if err != nil {
+			return err
+		}
 	
+		if err := os.MkdirAll(dst, srcInfo.Mode()); err != nil {
+			return err
+		}
+	
+		entries, err := os.ReadDir(src)
+		if err != nil {
+			return err
+		}
+	
+		for _, entry := range entries {
+			srcPath := filepath.Join(src, entry.Name())
+			dstPath := filepath.Join(dst, entry.Name())
+	
+			if entry.IsDir() {
+				if err := copyDir(srcPath, dstPath); err != nil {
+					return err
+				}
+			} else {
+				if err := copyFile(srcPath, dstPath); err != nil {
+					return err
+				}
+			}
+		}
+	
+		return nil
+	}
+	
+	func copyFile(src string, dst string) error {
+		srcFile, err := os.Open(src)
+		if err != nil {
+			return err
+		}
+		defer srcFile.Close()
+	
+		srcInfo, err := srcFile.Stat()
+		if err != nil {
+			return err
+		}
+	
+		dstFile, err := os.Create(dst)
+		if err != nil {
+			return err
+		}
+		defer dstFile.Close()
+	
+		if _, err := io.Copy(dstFile, srcFile); err != nil {
+			return err
+		}
+	
+		return os.Chmod(dst, srcInfo.Mode())
+	}
+ 
+
 	ext := filepath.Ext(src)
 	destName := fmt.Sprintf("%s-%s.temp%s", TempImageName, label, ext)
 	dest := filepath.Join(destDir, destName)
