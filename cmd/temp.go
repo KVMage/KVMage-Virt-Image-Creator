@@ -208,6 +208,23 @@ func copyToTempCustomDir(src string, label string, destDir string) (string, erro
 		return "", nil
 	}
 
+	info, err := os.Stat(src)
+	if err != nil {
+		return "", fmt.Errorf("failed to stat %s: %w", src, err)
+	}
+
+	if info.IsDir() {
+		destName := fmt.Sprintf("%s-%s.temp", TempImageName, label)
+		dest := filepath.Join(destDir, destName)
+	
+		PrintVerbose(2, "Copying %s directory to temp: %s", label, dest)
+	
+		if err := copyDir(src, dest); err != nil {
+			return "", fmt.Errorf("failed to copy directory %s: %w", src, err)
+		}
+		return dest, nil
+	}
+	
 	ext := filepath.Ext(src)
 	destName := fmt.Sprintf("%s-%s.temp%s", TempImageName, label, ext)
 	dest := filepath.Join(destDir, destName)
