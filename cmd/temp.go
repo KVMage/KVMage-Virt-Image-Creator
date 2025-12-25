@@ -192,10 +192,15 @@ func CopyInputFilesToTempDir(opts *Options) error {
 		return fmt.Errorf("source image copy failed: %w", err)
 	}
 	for i, uploadPath := range opts.Upload {
-		label := fmt.Sprintf("upload-%d", i)
-		tempPath, err := copyToTempCustomDir(uploadPath, label, TempUploadDir)
+		absPath, err := filepath.Abs(uploadPath)
 		if err != nil {
-			return fmt.Errorf("upload file copy failed for %s: %w", uploadPath, err)
+			return fmt.Errorf("failed to resolve upload path %s: %w", uploadPath, err)
+		}
+		opts.Upload[i] = absPath
+		label := fmt.Sprintf("upload-%d", i)
+		tempPath, err := copyToTempCustomDir(absPath, label, TempUploadDir)
+		if err != nil {
+			return fmt.Errorf("upload file copy failed for %s: %w", absPath, err)
 		}
 		TempUploadPaths = append(TempUploadPaths, tempPath)
 	}
