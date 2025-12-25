@@ -205,6 +205,14 @@ func CopyInputFilesToTempDir(opts *Options) error {
 		TempUploadPaths = append(TempUploadPaths, tempPath)
 	}
 
+	for i, execPath := range opts.Execute {
+		absPath, err := filepath.Abs(execPath)
+		if err != nil {
+			return fmt.Errorf("failed to resolve execute path %s: %w", execPath, err)
+		}
+		opts.Execute[i] = absPath
+	}
+	 
 	return nil
 }
 
