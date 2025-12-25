@@ -111,7 +111,7 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 			uploadedDirs = append(uploadedDirs, originalPath)
 		} else {
 			vmParentDir := filepath.Dir(vmPath)
-			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmParentDir))
+			args = append(args, "--run-command", "mkdir -p /tmp/kvmage")
 			args = append(args, "--upload", fmt.Sprintf("%s:%s", tempUploadPath, vmPath))
 			PrintVerbose(2, "Uploading file: %s -> %s", originalPath, vmPath)
 		}
