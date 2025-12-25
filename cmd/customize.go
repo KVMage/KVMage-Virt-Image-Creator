@@ -105,9 +105,8 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 			return fmt.Errorf("failed to stat upload path %s: %w", originalPath, err)
 		}
 		if info.IsDir() {
-			vmParent := filepath.Dir(vmPath)
-			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmParent))
-			args = append(args, "--copy-in", fmt.Sprintf("%s:%s", tempUploadPath, vmParent))
+			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmPath))
+			args = append(args, "--copy-in", fmt.Sprintf("%s:%s", tempUploadPath, vmPath))		 
 			PrintVerbose(2, "Uploading directory: %s -> %s", originalPath, vmPath)
 			uploadedDirs = append(uploadedDirs, originalPath)
 		} else {
