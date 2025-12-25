@@ -114,7 +114,9 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 	}
 	for _, execPath := range opts.Execute {
 		vmPath := filepath.Join("/tmp/kvmage", execPath)
-		args = append(args, "--run", vmPath)
+		args = append(args, "--chmod", fmt.Sprintf("0755:%s", vmPath))
+		PrintVerbose(2, "Setting executable permissions for: %s", vmPath)
+	 	args = append(args, "--run", vmPath)
 		PrintVerbose(2, "Will execute: %s", vmPath)
 	}
 	if len(opts.Upload) > 0 {
