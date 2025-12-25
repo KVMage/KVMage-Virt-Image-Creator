@@ -40,10 +40,19 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 		}
 
 		if targetSizeGB < currentSizeGB {
-			PrintError("Refusing to shrink image: requested size %.1f GB is less than current size %.1f GB", targetSizeGB, currentSizeGB)
+			PrintError(
+				"Refusing to shrink image: requested size %.1f GB is less than current size %.1f GB",
+				targetSizeGB,
+				currentSizeGB,
+			)
 			return fmt.Errorf("image_size must not be smaller than the current image size")
 		} else if targetSizeGB > currentSizeGB {
-			PrintVerbose(1, "Expanding image from %.1f GB to %.1f GB", currentSizeGB, targetSizeGB)
+			PrintVerbose(
+				1,
+				"Expanding image from %.1f GB to %.1f GB",
+				currentSizeGB,
+				targetSizeGB,
+			)
 			if err := exec.Command("qemu-img", "resize", tempPath, opts.ImageSize).Run(); err != nil {
 				return fmt.Errorf("qemu-img resize failed: %w", err)
 			}
@@ -66,7 +75,11 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 			tempPath,
 		}
 
-		PrintVerbose(2, "Running virt-resize with args: virt-resize %s", joinArgs(args))
+		PrintVerbose(
+			2,
+			"Running virt-resize with args: virt-resize %s",
+			joinArgs(args),
+		)
 		if err := exec.Command("virt-resize", args...).Run(); err != nil {
 			return fmt.Errorf("virt-resize failed: %w", err)
 		}
@@ -79,28 +92,31 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 	if verboseLevel >= 2 {
 		args = append(args, "-x")
 	}
-    for i, originalPath := range opts.Upload {
-    	tempPath := TempUploadPaths[i]
-    	vmPath := filepath.Join("/tmp/kvmage", originalPath)
+	for i, originalPath := range opts.Upload {
+		tempUploadPath := TempUploadPaths[i]
+		vmPath := filepath.Join("/tmp/kvmage", originalPath)
 
-    	info, err := os.Stat(tempPath)
-    	if err != nil {
-    		return fmt.Errorf("failed to stat upload path %s: %w", originalPath, err)
-    	}
+		info, err := os.Stat(tempUploadPath)
+		if err != nil {
+			return fmt.Errorf("failed to stat upload path %s: %w", originalPath, err)
+		}
 		if info.IsDir() {
 			vmParent := filepath.Dir(vmPath)
-    		args = append(args, "--copy-in", fmt.Sprintf("%s:%s", tempPath, vmParent))
-    		PrintVerbose(2, "Uploading directory: %s -> %s", originalPath, vmPath)
-    	} else {
-			args = append(args, "--upload", fmt.Sprintf("%s:%s", tempPath, vmPath))
-   			PrintVerbose(2, "Uploading file: %s -> %s", originalPath, vmPath)
-   		}
+			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmParent))
+			args = append(args, "--copy-in", fmt.Sprintf("%s:%s", tempUploadPath, vmParent))
+			PrintVerbose(2, "Uploading directory: %s -> %s", originalPath, vmPath)
+		} else {
+			vmParentDir := filepath.Dir(vmPath)
+			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmParentDir))
+			args = append(args, "--upload", fmt.Sprintf("%s:%s", tempUploadPath, vmPath))
+			PrintVerbose(2, "Uploading file: %s -> %s", originalPath, vmPath)
+		}
 	}
 	for _, execPath := range opts.Execute {
-   		vmPath := filepath.Join("/tmp/kvmage", execPath)
-   		args = append(args, "--run", vmPath)
-   		PrintVerbose(2, "Will execute: %s", vmPath)
-   	}
+		vmPath := filepath.Join("/tmp/kvmage", execPath)
+		args = append(args, "--run", vmPath)
+		PrintVerbose(2, "Will execute: %s", vmPath)
+	}
 	if len(opts.Upload) > 0 {
 		args = append(args, "--run-command", "rm -rf /tmp/kvmage || true")
 		PrintVerbose(2, "Will cleanup /tmp/kvmage in VM")
@@ -110,7 +126,11 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 		PrintVerbose(2, "Setting hostname: %s", opts.Hostname)
 	}
 
-	PrintVerbose(3, "Running virt-customize with args: virt-customize %s", joinArgs(args))
+	PrintVerbose(
+		3,
+		"Running virt-customize with args: virt-customize %s",
+		joinArgs(args),
+	)
 	PrintVerbose(1, "Executing virt-customize...")
 
 	run := func(cmdName string, args []string) error {

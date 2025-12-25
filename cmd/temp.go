@@ -18,9 +18,11 @@ var (
 	TempInstallMedia string
 	TempImageSource  string
 	TempUploadPaths  []string
+	TempUploadDir    string
 )
 
 const tempDir = "/var/lib/libvirt/images"
+const uploadTempDir = "/var/lib/libvirt/tmp"
 
 func CreateTempImage(opts *Options) (string, string, error) {
 	RequireRoot()
@@ -155,6 +157,14 @@ func CopyInputFilesToTempDir(opts *Options) error {
 
 	var err error
 
+	if len(opts.Upload) > 0 {
+		TempUploadDir = filepath.Join(uploadTempDir, TempImageName)
+		if err := os.MkdirAll(TempUploadDir, 0755); err != nil {
+			return fmt.Errorf("failed to create upload temp directory: %w", err)
+		}
+		PrintVerbose(2, "Created upload temp directory: %s", TempUploadDir)
+	}
+	 
 	if TempInstallFile, err = copyToTemp(opts.InstallFile, "auto"); err != nil {
 		return fmt.Errorf("auto install file copy failed: %w", err)
 	}
@@ -183,7 +193,7 @@ func CopyInputFilesToTempDir(opts *Options) error {
 	}
 	for i, uploadPath := range opts.Upload {
 		label := fmt.Sprintf("upload-%d", i)
-		tempPath, err := copyToTemp(uploadPath, label)
+		tempPath, err := copyToTempCustomDir(uploadPath, label, TempUploadDir)
 		if err != nil {
 			return fmt.Errorf("upload file copy failed for %s: %w", uploadPath, err)
 		}
@@ -193,6 +203,36 @@ func CopyInputFilesToTempDir(opts *Options) error {
 	return nil
 }
 
+func copyToTempCustomDir(src string, label string, destDir string) (string, error) {
+	if src == "" {
+		return "", nil
+	}
+
+	ext := filepath.Ext(src)
+	destName := fmt.Sprintf("%s-%s.temp%s", TempImageName, label, ext)
+	dest := filepath.Join(destDir, destName)
+
+	PrintVerbose(2, "Copying %s to temp file: %s", label, dest)
+
+	in, err := os.Open(src)
+	if err != nil {
+		return "", fmt.Errorf("failed to open %s: %w", src, err)
+	}
+	defer in.Close()
+
+	out, err := os.Create(dest)
+	if err != nil {
+		return "", fmt.Errorf("failed to create temp file %s: %w", dest, err)
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, in); err != nil {
+		return "", fmt.Errorf("failed to copy to temp file %s: %w", dest, err)
+	}
+
+	return dest, nil
+}
+ 
 func joinArgs(args []string) string {
 	return fmt.Sprintf("%q", args)
 }

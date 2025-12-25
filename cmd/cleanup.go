@@ -15,8 +15,6 @@ func CleanupArtifacts() {
 		TempInstallMedia,
 		TempImageSource,
 	}
-
-	paths = append(paths, TempUploadPaths...)
  
 	for _, path := range paths {
 		if path == "" {
@@ -38,6 +36,16 @@ func CleanupArtifacts() {
 			PrintVerbose(2, "Removed temporary file: %s", path)
 		}
 	}
+
+	if TempUploadDir != "" {
+		if _, err := os.Stat(TempUploadDir); err == nil {
+			if err := os.RemoveAll(TempUploadDir); err != nil {
+				PrintError("Warning: failed to remove upload temp directory %s: %v", TempUploadDir, err)
+			} else {
+				PrintVerbose(2, "Removed upload temp directory: %s", TempUploadDir)
+			}
+		}
+	} 
 
 	if TempImageName != "" {
 		removeTempVM(TempImageName)
