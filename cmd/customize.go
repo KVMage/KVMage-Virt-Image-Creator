@@ -92,6 +92,10 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 	if verboseLevel >= 2 {
 		args = append(args, "-x")
 	}
+
+	uploadedPaths := make(map[string]bool)
+	uploadedDirs := []string{}
+
 	for i, originalPath := range opts.Upload {
 		tempUploadPath := TempUploadPaths[i]
 		vmPath := filepath.Join("/tmp/kvmage", originalPath)
@@ -105,15 +109,37 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmParent))
 			args = append(args, "--copy-in", fmt.Sprintf("%s:%s", tempUploadPath, vmParent))
 			PrintVerbose(2, "Uploading directory: %s -> %s", originalPath, vmPath)
+			uploadedDirs = append(uploadedDirs, originalPath)
 		} else {
 			vmParentDir := filepath.Dir(vmPath)
 			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmParentDir))
 			args = append(args, "--upload", fmt.Sprintf("%s:%s", tempUploadPath, vmPath))
 			PrintVerbose(2, "Uploading file: %s -> %s", originalPath, vmPath)
 		}
+		uploadedPaths[originalPath] = true
 	}
 	for _, execPath := range opts.Execute {
 		vmPath := filepath.Join("/tmp/kvmage", execPath)
+
+		isAlreadyUploaded := uploadedPaths[execPath]
+		if !isAlreadyUploaded {
+			for _, dir := range uploadedDirs {
+				if strings.HasPrefix(execPath, dir+"/") || execPath == dir {
+					isAlreadyUploaded = true
+					PrintVerbose(2, "Execute file %s already uploaded as part of directory %s", execPath, dir)
+					break
+				}
+			}
+		}
+		if !isAlreadyUploaded {
+			if _, err := os.Stat(execPath); err != nil {
+				return fmt.Errorf("execute file not found: %s: %w", execPath, err)
+			}
+			vmParentDir := filepath.Dir(vmPath)
+			args = append(args, "--run-command", fmt.Sprintf("mkdir -p %s", vmParentDir))
+			args = append(args, "--upload", fmt.Sprintf("%s:%s", execPath, vmPath))
+			PrintVerbose(2, "Auto-uploading execute file: %s -> %s", execPath, vmPath)
+		}
 		args = append(args, "--chmod", fmt.Sprintf("0755:%s", vmPath))
 		PrintVerbose(2, "Setting executable permissions for: %s", vmPath)
 		args = append(args, "--run-command", vmPath)
