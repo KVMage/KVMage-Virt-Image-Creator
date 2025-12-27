@@ -17,12 +17,12 @@ kvmage:
     image_src: ./debian_src.qcow2
     image_dest: .
     hostname: debian
-    files_dirs:
+    upload:
       - file.sh
       - /full/path/file
       - /full/path/or/dir
       - ./relative/path
-    execution_files:
+    execute:
       - /full/path/file/execute_first.sh
       - ./relative/path/execute_second.sh
     firmware: efi

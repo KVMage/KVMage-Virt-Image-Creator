@@ -5,5 +5,5 @@ sudo kvmage --run \
     --image-src ./debian.qcow2 \
     --image-dest . \
     --hostname debian \
-    --custom-script script.sh \
+    --execute script.sh \
     --firmware efi
