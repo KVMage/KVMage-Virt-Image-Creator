@@ -24,9 +24,7 @@ func GetRequirements() string {
 }
 
 type Requirement struct {
-    Packages   []string
-    MinVersion string
-    MaxVersion string
+    Packages []string
 }
 
 func parseRequirements(content string) []Requirement {
@@ -42,29 +40,15 @@ func parseRequirements(content string) []Requirement {
 
         alternatives := strings.Split(line, "|")
         var packages []string
-        var minVer, maxVer string
 
-        for i, alt := range alternatives {
+        for _, alt := range alternatives {
             alt = strings.TrimSpace(alt)
-            parts := strings.Fields(alt)
-
-            if len(parts) < 3 {
-                continue
-            }
-
-            packages = append(packages, parts[0])
-
-            if i == 0 {
-                minVer = parts[1]
-                maxVer = parts[2]
             }
         }
 
         if len(packages) > 0 {
             reqs = append(reqs, Requirement{
-                Packages:   packages,
-                MinVersion: minVer,
-                MaxVersion: maxVer,
+                Packages: packages,
             })
         }
     }
@@ -75,25 +59,6 @@ func parseRequirements(content string) []Requirement {
 func checkPackageExists(pkg string) bool {
     _, err := exec.LookPath(pkg)
     return err == nil
-}
-
-func formatVersionInfo(minVer, maxVer string) string {
-    hasMin := minVer != "" && minVer != "*"
-    hasMax := maxVer != "" && maxVer != "*"
-
-    if !hasMin && !hasMax {
-        return ""
-    }
-
-    if hasMin && hasMax {
-        return fmt.Sprintf("(recommended: %s - %s)", minVer, maxVer)
-    }
-
-    if hasMin {
-        return fmt.Sprintf("(recommended: %s+)", minVer)
-    }
-
-    return fmt.Sprintf("(recommended: up to %s)", maxVer)
 }
 
 func CheckRequirements() {
@@ -114,25 +79,14 @@ func CheckRequirements() {
     Print("")
 
     allMet := true
-    warnings := []string{}
 
     for _, req := range reqs {
-        versionInfo := formatVersionInfo(req.MinVersion, req.MaxVersion)
-
         if len(req.Packages) == 1 {
             pkg := req.Packages[0]
             if checkPackageExists(pkg) {
-                if versionInfo != "" {
-                    Print("  ✓ %s %s", pkg, versionInfo)
-                } else {
-                    Print("  ✓ %s", pkg)
-                }
+                Print("  ✓ %s", pkg)
             } else {
-                if versionInfo != "" {
-                    Print("  ✗ %s (not found) %s", pkg, versionInfo)
-                } else {
-                    Print("  ✗ %s (not found)", pkg)
-                }
+                Print("  ✗ %s (not found)", pkg)
                 allMet = false
             }
         } else {
@@ -162,17 +116,6 @@ func CheckRequirements() {
         Print("Result: Missing required dependencies ✗")
         os.Exit(1)
     }
-
-    if len(warnings) > 0 {
-        Print("")
-        Print("Warnings:")
-        for _, w := range warnings {
-            Print("  - %s", w)
-        }
-    }
-
-    Print("")
-    Print("Note: Listed versions are tested and supported. Other versions are unsupported and used at your own risk.")
 }
 
 func QuickCheckRequirements() error {

@@ -3,11 +3,11 @@
 # For no version constraints, use an astrisk (*) either for min_version max_version or both
 # For alternative packages, use a seperator (|)
 
-curl * * | wget * *
-lsof * *
-osinfo-query * *
-qemu-img * *
-virt-customize * *
-virt-install * *
-virt-resize * *
-virsh * *
+curl | wget
+lsof
+osinfo-query
+qemu-img
+virt-customize
+virt-install
+virt-resize
+virsh
