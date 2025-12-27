@@ -43,7 +43,7 @@ func parseRequirements(content string) []Requirement {
 
         for _, alt := range alternatives {
             alt = strings.TrimSpace(alt)
-            if alt != '' {
+            if alt != "" {
                 packages = append(packages, alt)
             }
         }
