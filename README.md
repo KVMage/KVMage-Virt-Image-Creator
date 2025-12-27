@@ -4,34 +4,34 @@ KVMage is an image creation software similar to something like "HashiCorp Packer
 
 ## Requirements
 
-Before you just download the binary or compile KVMage on your system, there are a few things you want to make sure that you are able to do on your system. Since KVMage is dependent on existing software on the system, you need to make sure that you are able to execute the following commands. These commands can be installed a number of ways depending on the distro you are using but as long as you are able to execute them, that is all that matters.
+The requirements are listed in the `REQUIREMENTS` file located in the root of the repo. KVMage performs a requirements check during install and at the beginning of command execution. You can also optionally perform a manual check using the `-R, --check-requirements` flag options.
 
-```
-virt-install
+There are three primary required executables:
+
+```bash
 virt-customize
-qwemu-img
+virt-install
+qemu-img
 ```
-
-If you are able to successfully execute these commands without any issue, then you are good to get started.
 
 ## Installation
 
-Here are a few ways that you are able to install
+There are currently two different officially supported methods for use.
 
-- Manually compile the code on your system by downloading the repo and using the compile instructions (requires Go)
-- Download a precompiled binary [available soon]
-- Use our Docker image with everything ready to go [roadmap]
+- Clone the repository and compile the code. (We include a script that will do this automatically)
+- Clone the repository and create the Docker image.
 
+Precompiled binaries and readily available container images in GHCR and Docker Hub will be available in the future.
 
 ### Manual Installation
 
 Use `git clone` to download the repo locally:
 
-``` Bash
+``` bash
 git clone https://gitlab.com/kvmage/kvmage.git
 ```
 
-``` Bash
+``` bash
 cd kvmage
 mkdir -p dist
 bash build.sh
@@ -43,6 +43,18 @@ rm -rf kvmage
 Autoinstall script
 ```
 bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/main/scripts/autoinstall.sh)
+```
+
+### Manually Build Docker Image
+
+Build KVMage Docker container with `latest` tag
+```bash
+docker build -t kvmage:latest https://gitlab.com/kvmage/kvmage.git
+```
+
+Build KVMage Docker container with `VERSION` tag
+```bash
+docker build -t kvmage:$(curl -fsSL https://gitlab.com/kvmage/kvmage/-/raw/main/VERSION | tr -d '\n') https://gitlab.com/kvmage/kvmage.git
 ```
 
 ## How to Use KVMage
@@ -74,12 +86,12 @@ RUN Example:
 kvmage \
     --run \
     --install \
-    --image-name almalinux01 \
+    --image-name almalinux9 \
     --os-var almalinux9 \
     --image-size 100G \
-    --ks-file ks.cfg \
+    --install-file ks.cfg \
     --install-media almalinux9.5-minimal.iso \
-    --image-dest $PWD
+    --image-dest .
 ```
 
 CONFIG Example:
@@ -87,13 +99,13 @@ CONFIG Example:
 ---
 kvmage:
   almalinux9:
-    image_name: almalinux01
+    image_name: almalinux9
     virt_mode: install
     os_var: almalinux9
     image_size: 100G
-    ks_file: ks.cfg
-    install_media: almalinux9.5-minimal.iso
-    image_dest: $PWD
+    install_file: ks.cfg
+    install_media: almalinux9-minimal.iso
+    image_dest: .
 ```
 
 ### KVMage Customize
@@ -104,57 +116,62 @@ RUN Example:
 kvmage \
     --run \
     --customize \
-    --image-name almalinux02 \
+    --image-name almalinux9-latest \
     --os-var almalinux9 \
-    --image-src almalinux01.qcow2 \
+    --image-src almalinux9.qcow2 \
     --image-dest $PWD \
-    --custom-script script.sh
+    --execute script.sh
 ```
 
 ```yaml
 ---
 kvmage:
-  almalinux02:
-    image_name: almalinux02
+  almalinux9:
+    image_name: almalinux9-latest
     virt_mode: customize
     os_var: almalinux9
-    image_src: almalinux01.qcow2
-    img_dest: $PWD
-    custom_script: script.sh
+    image_src: almalinux9.qcow2
+    img_dest: .
+    execute: script.sh
 ```
 ### KVMage Options
 
-> **NOTE**
-> The following options are not functional (currently): verbose, debug
 
-```
-kvamge [command]
+```cfg
+Usage:
+  kvmage [--run | --config] [flags]
 
--h, --help (help menu)
--v, --verbose (enabled verbose for kvmage)
--d, --debug (enables --debug flag for virt-install and virt-customize)
--V, --version (prints version information for kvamge, kvm, )
+Execution Modes (required):
+  -r, --run                     Use CLI arguments directly
+  -f, --config <file>           Use a YAML config file
 
-(kvmage requires run OR config but not both)
--r, --run [command args]
--f, --config <config_file>
+Installation Methods (required):
+  -i, --install                 Install mode (create image from ISO)
+  -c, --customize               Customize mode (modify existing image)
 
-(kvmage requires install or config but not both)
--i, --install | virt_mode: install (requires image_name, os_var, image_size, ks_file, install_media, and image_dest)
--c, --customize | virt_mode: customize (requires image_name, os_var, image_src, image_dest)
+Image Options:
+  -n, --image-name <name>       Name of the image
+  -o, --os-var <os>             OS variant (use `osinfo-query os`)
+  -s, --image-size <size>       Image size (e.g., 100G), expands image in customize mode
+  -P, --image-part <device>     Partition to expand (e.g., /dev/sda1)
+  -k, --install-file <file>     Path to Install file
+  -l, --install-media <path>    Install media path or URL
+  -S, --image-src <file>        Source QCOW2 image (customize mode)
+  -D, --image-dest <file>       Destination QCOW2 image
+  -H, --hostname <name>         Hostname to set inside the image (optional)
+  -U, --upload <path>              Files or directories to upload (temp)
+  -E, --execute <file>             Files to execute scripts (in order)
+  -W, --network <iface>         Virtual network name (optional)
+  -m, --firmware <type>         Firmware type: bios (default) or efi
 
--n, --image-name | image_name <name>
--o, --os-var <os> | os_var: <os> (this comes from osinfo-query os)
--s, --image-size <size> | image_size: <size> (eg. 100G)
--k, --ks-file | ks_file: <ks_file> 
--l, --install-media | install_media: <media> (virt-install --location)
-
-
--H, --hostname <hostname> | hostname: <hostname> (optional)
--C, --custom-script | custom_script: <script_file> (bash file, optional but should be included with config option)
--S, --image-src <src_qcow> | image_src: <src_qcow>
--D, --image-dest <dest_qcow> | image_dest: <dest_qcow>
--W, --network <iface> | network: <iface> (optional)
+Global Options:
+  -h, --help                    Show help and exit
+  -v, --verbose                 Enable verbose output (-v/-vv/-vvv)
+      --verbose-level <n>       Set verbosity level explicitly (0-3)
+  -q, --quiet                   Suppress all output
+  -V, --version                 Show version info for KVMage and tools
+  -u, --uninstall               Uninstall KVMage from /usr/local/bin
+  -X, --cleanup                 Run cleanup mode to remove orphaned kvmage temp files
 ```
 
 ## Docker Container Usage
@@ -174,5 +191,4 @@ sudo docker run --rm -it \
   -v /var/lib/libvirt:/var/lib/libvirt \
   kvmage:latest \
   install --config kvmage.yml
-
 ```

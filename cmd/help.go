@@ -41,6 +41,7 @@ func CustomHelp(cmd *cobra.Command, args []string) {
 	Print("      --verbose-level <n>       Set verbosity level explicitly (0-3)")
 	Print("  -q, --quiet                   Suppress all output")
 	Print("  -V, --version                 Show version info for KVMage and tools")
+	Print("  -R, --check-requirements      Check system requirements and exit")
 	Print("  -u, --uninstall               Uninstall KVMage from /usr/local/bin")
 	Print("  -X, --cleanup                 Run cleanup mode to remove orphaned kvmage temp files")
 	Print("")
