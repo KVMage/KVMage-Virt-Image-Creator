@@ -12,6 +12,7 @@ var (
 
         runMode    bool
         configPath string
+        envFilePath string
 
         installFlag   bool
         customizeFlag bool
@@ -29,6 +30,7 @@ func init() {
 
         rootCmd.PersistentFlags().BoolVarP(&runMode, "run", "r", false, "Use CLI args to run KVMage")
         rootCmd.PersistentFlags().StringVarP(&configPath, "config", "f", "", "Path to YAML config file (defaults to kvmage.yml if not specified)")
+        rootCmd.PersistentFlags().StringVar(&envFilePath, "env-file", "", "Path to env file for variable substitution")
         rootCmd.PersistentFlags().Lookup("config").NoOptDefVal = "AUTO"
 
         rootCmd.Flags().BoolVarP(&installFlag, "install", "i", false, "Run in install mode")
