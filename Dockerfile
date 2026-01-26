@@ -1,6 +1,6 @@
 ARG CONTAINER_NAME=9-minimal
 ARG ALMA_VERSION=9.6
-ARG ALMA_TAG_DATE=20251117
+ARG ALMA_TAG_DATE=20260126
 
 FROM ghcr.io/almalinux/${CONTAINER_NAME}:${ALMA_VERSION}-${ALMA_TAG_DATE}
 
@@ -45,7 +45,9 @@ RUN microdnf update -y && \
     microdnf clean all
 
 # Install KVMage
-RUN bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/main/scripts/autoinstall.sh)
+ARG KVMAGE_BRANCH=main
+ENV KVMAGE_BRANCH=${KVMAGE_BRANCH}
+RUN curl -fsSL "https://gitlab.com/kvmage/kvmage/-/raw/${KVMAGE_BRANCH}/scripts/autoinstall.sh" | bash
 
 WORKDIR /kvmage
 

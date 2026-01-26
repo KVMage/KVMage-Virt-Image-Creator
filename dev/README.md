@@ -26,7 +26,7 @@ rm -rf kvmage
 
 Autoinstall script
 ```
-bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/dev/scripts/autoinstall.sh)
+KVMAGE_BRANCH=dev bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/dev/scripts/autoinstall.sh)
 ```
 
 ### Manually Build Docker Image
@@ -39,4 +39,12 @@ docker build -t kvmage:latest https://gitlab.com/kvmage/kvmage.git#dev
 Build KVMage Docker container with `VERSION` tag
 ```bash
 docker build -t kvmage:$(curl -fsSL https://gitlab.com/kvmage/kvmage/-/raw/dev/VERSION | tr -d '\n') https://gitlab.com/kvmage/kvmage.git#dev
+```
+
+## Docker
+
+### Auto Build
+
+```bash
+KVMAGE_BRANCH=dev bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/dev/scripts/autobuild.sh)
 ```
