@@ -45,7 +45,9 @@ RUN microdnf update -y && \
     microdnf clean all
 
 # Install KVMage
-RUN bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/main/scripts/autoinstall.sh)
+ARG KVMAGE_BRANCH=main
+ENV KVMAGE_BRANCH=${KVMAGE_BRANCH}
+RUN curl -fsSL "https://gitlab.com/kvmage/kvmage/-/raw/${KVMAGE_BRANCH}/scripts/autoinstall.sh" | bash
 
 WORKDIR /kvmage
 

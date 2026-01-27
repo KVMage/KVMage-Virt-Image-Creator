@@ -42,7 +42,7 @@ rm -rf kvmage
 
 Autoinstall script
 ```
-bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/main/scripts/autoinstall.sh)
+KVMAGE_BRANCH=main bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/main/scripts/autoinstall.sh)
 ```
 
 ### Manually Build Docker Image
@@ -191,4 +191,10 @@ sudo docker run --rm -it \
   -v /var/lib/libvirt:/var/lib/libvirt \
   kvmage:latest \
   install --config kvmage.yml
+```
+
+### Auto Build
+
+```bash
+KVMAGE_BRANCH=main bash <(curl -s https://gitlab.com/kvmage/kvmage/-/raw/main/scripts/autobuild.sh)
 ```

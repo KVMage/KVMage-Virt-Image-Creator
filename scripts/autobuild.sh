@@ -19,11 +19,8 @@ echo "[*] Confirming branch..."
 echo "[*] Branch: $(git rev-parse --abbrev-ref HEAD)"
 echo "[*] Commit: $(git rev-parse --short HEAD)"
 
-echo "[*] Running kvmage-build.sh..."
-bash "${SCRIPTS_DIR}/kvmage-build.sh"
-
-echo "[*] Running kvmage-install.sh..."
-bash "${SCRIPTS_DIR}/kvmage-install.sh"
+echo "[*] Running docker-build.sh..."
+KVMAGE_BRANCH="${KVMAGE_BRANCH}" bash "${SCRIPTS_DIR}/docker-build.sh"
 
 echo "[*] Cleaning up..."
 cd ..
