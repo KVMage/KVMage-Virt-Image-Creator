@@ -161,9 +161,9 @@ func RunCustomize(opts *Options, tempName, tempPath string) error {
 		args = append(args, "--run-command", vmPath)
 		PrintVerbose(2, "Will execute: %s", vmPath)
 	}
-	if len(opts.Upload) > 0 {
-		args = append(args, "--run-command", "rm -rf /tmp/kvmage || true")
-		PrintVerbose(2, "Will cleanup /tmp/kvmage in VM")
+	args = append(args, "--run-command", "rm -rf /tmp/kvmage || true")
+	PrintVerbose(2, "Will cleanup /tmp/kvmage in VM")
+ 
 	}
 	if opts.Hostname != "" {
 		args = append(args, "--hostname", opts.Hostname)
