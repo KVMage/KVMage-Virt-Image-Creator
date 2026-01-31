@@ -120,13 +120,24 @@ func loadEnvVars(configPath, envFilePath string) map[string]string {
 
 func expandVars(content string, env map[string]string) string {
 	re := regexp.MustCompile(`\$\{([^}]+)\}`)
-	return re.ReplaceAllStringFunc(content, func(match string) string {
-			key := match[2 : len(match)-1]
-			if val, ok := env[key]; ok {
-					return val
-			}
-			return match
+	content = re.ReplaceAllStringFunc(content, func(match string) string {
+		key := match[2 : len(match)-1]
+		if val, ok := env[key]; ok {
+			return val
+		}
+		return match
 	})
+	
+	re2 := regexp.MustCompile(`\$([A-Za-z_][A-Za-z0-9_]*)`)
+	content = re2.ReplaceAllStringFunc(content, func(match string) string {
+		key := match[1:]
+		if val, ok := env[key]; ok {
+			return val
+		}
+		return match
+	})
+	
+	return content
 }
 
 func LoadConfig(path string) (map[string]*Options, error) {
