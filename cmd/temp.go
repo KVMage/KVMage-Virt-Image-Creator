@@ -67,13 +67,11 @@ func CreateTempImage(opts *Options) (string, string, error) {
 func resolveInstallMedia(src string) (string, error) {
 	if strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://") {
 		if strings.HasSuffix(strings.ToLower(src), ".iso") {
-			filename := filepath.Base(src)
-			dest := filepath.Join(os.TempDir(), filename)
-
-			if _, err := os.Stat(dest); err == nil {
-				PrintVerbose(2, "Using cached remote ISO: %s", dest)
-				return dest, nil
+			ext := filepath.Ext(src)
+			if ext == "" {
+				ext = ".iso"
 			}
+			dest := filepath.Join(tempDir, fmt.Sprintf("%s-iso.temp%s", TempImageName, ext))
 
 			var downloader string
 			if _, err := exec.LookPath("curl"); err == nil {
@@ -85,6 +83,7 @@ func resolveInstallMedia(src string) (string, error) {
 			}
 
 			PrintVerbose(2, "Downloading ISO from %s using %s", src, downloader)
+			PrintVerbose(2, "Download destination: %s", dest)
 
 			var cmd *exec.Cmd
 			if downloader == "curl" {
