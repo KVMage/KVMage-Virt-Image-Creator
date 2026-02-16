@@ -193,7 +193,7 @@ sudo docker run --rm -it \
   -v /var/run/libvirt:/var/run/libvirt \
   -v /var/lib/libvirt:/var/lib/libvirt \
   kvmage:latest \
-  install --customize kvmage.yml
+  install --run --customize kvmage.yml
 ```
 
 ### Auto Build
