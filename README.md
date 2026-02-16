@@ -54,7 +54,10 @@ docker build -t kvmage:latest https://gitlab.com/kvmage/kvmage.git
 
 Build KVMage Docker container with `VERSION` tag
 ```bash
-docker build -t kvmage:$(curl -fsSL https://gitlab.com/kvmage/kvmage/-/raw/main/VERSION | tr -d '\n') https://gitlab.com/kvmage/kvmage.git
+docker build \
+  -t kvmage:latest \
+  -t "kvmage:$(curl -fsSL https://gitlab.com/kvmage/kvmage/-/raw/main/VERSION | tr -d '\n')" \
+  https://gitlab.com/kvmage/kvmage.git
 ```
 
 ## How to Use KVMage
@@ -186,11 +189,11 @@ Below is an example of what you want to execute:
 sudo docker run --rm -it \
   --privileged \
   --device /dev/kvm \
-  -v kvmage:/kvmage \
+  -v ${PWD}:/kvmage \
   -v /var/run/libvirt:/var/run/libvirt \
   -v /var/lib/libvirt:/var/lib/libvirt \
   kvmage:latest \
-  install --config kvmage.yml
+  --config kvmage.yml
 ```
 
 ### Auto Build
