@@ -30,7 +30,9 @@ RUN microdnf update -y && \
         go \
         guestfs-tools \
         libosinfo \
+        libvirt \
         libvirt-client \
+        lsof \
         osinfo-db-tools \
         parted \
         qemu-kvm \
