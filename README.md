@@ -54,11 +54,9 @@ docker build -t kvmage:latest https://gitlab.com/kvmage/kvmage.git
 
 Build KVMage Docker container with `VERSION` tag
 ```bash
-VER="$(curl -fsSL https://gitlab.com/kvmage/kvmage/-/raw/main/VERSION | tr -d '\n')"
-
 docker build \
-  -t "kvmage:${VER}" \
-  -t "kvmage:latest" \
+  -t kvmage:latest \
+  -t "kvmage:$(curl -fsSL https://gitlab.com/kvmage/kvmage/-/raw/main/VERSION | tr -d '\n')" \
   https://gitlab.com/kvmage/kvmage.git
 ```
 
