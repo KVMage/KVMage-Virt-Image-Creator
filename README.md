@@ -189,11 +189,11 @@ Below is an example of what you want to execute:
 sudo docker run --rm -it \
   --privileged \
   --device /dev/kvm \
-  -v kvmage:/kvmage \
+  -v ${PWD}:/kvmage \
   -v /var/run/libvirt:/var/run/libvirt \
   -v /var/lib/libvirt:/var/lib/libvirt \
   kvmage:latest \
-  install --run --customize kvmage.yml
+  --config kvmage.yml
 ```
 
 ### Auto Build
