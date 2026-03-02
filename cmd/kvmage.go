@@ -28,7 +28,59 @@ func runMain(cmd *cobra.Command, args []string) error {
     if runMode {
         return runRunMode()
     } else if configPath != "" {
-        resolvedPath, err := ResolveConfigPath(configPath)
+        resolvedPath, err := ResolveConfigPath(configPath, args)
+        if err != nil {
+            PrintError("%v", err)
+            os.Exit(1)
+        }
+        return runConfigMode(resolvedPath)
+    }
+
+    return nil
+}[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ ^C
+[ctos_local@dev-base-code cmd]$ cat kvmage.go 
+package cmd
+
+import (
+    "os"
+
+    "github.com/spf13/cobra"
+)
+
+func runMain(cmd *cobra.Command, args []string) error {
+    if HandleGlobalFlags() {
+        return nil
+    }
+
+    if err := QuickCheckRequirements(); err != nil {
+        PrintError("WARNING: %v", err)
+        PrintError("Run 'kvmage --check-requirements' for details")
+        PrintError("")
+    }
+
+    if err := ValidateModeFlags(runMode, configPath); err != nil {
+        PrintError("%v", err)
+        os.Exit(1)
+    }
+
+    SetupSignalHandler(CleanupArtifacts)
+    defer CleanupArtifacts()
+
+    if runMode {
+        return runRunMode()
+    } else if configPath != "" {
+        resolvedPath, err := ResolveConfigPath(configPath, args)
         if err != nil {
             PrintError("%v", err)
             os.Exit(1)
