@@ -28,7 +28,7 @@ func runMain(cmd *cobra.Command, args []string) error {
     if runMode {
         return runRunMode()
     } else if configPath != "" {
-        resolvedPath, err := ResolveConfigPath(configPath)
+        resolvedPath, err := ResolveConfigPath(configPath, args)
         if err != nil {
             PrintError("%v", err)
             os.Exit(1)
@@ -37,4 +37,3 @@ func runMain(cmd *cobra.Command, args []string) error {
     }
 
     return nil
-}
