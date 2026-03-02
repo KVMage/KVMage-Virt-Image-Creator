@@ -1,0 +1,9 @@
+REGISTRY="registry.gitlab.com/kvmage/kvmage"
+VER="$(curl -fsSL https://gitlab.com/kvmage/kvmage/-/raw/main/VERSION | tr -d '\n')"
+
+sudo docker tag "kvmage:latest" "${REGISTRY}:latest"
+sudo docker tag "kvmage:${VER}" "${REGISTRY}:${VER}"
+
+sudo docker login registry.gitlab.com
+sudo docker push "${REGISTRY}:latest"
+sudo docker push "${REGISTRY}:${VER}"
