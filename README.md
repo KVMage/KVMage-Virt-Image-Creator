@@ -21,12 +21,40 @@ virsh
 
 ## Installation
 
-There are currently two different officially supported methods for use.
+There are several ways to install and use KVMage:
 
-- Clone the repository and compile the code. (We include a script that will do this automatically)
-- Clone the repository and create the Docker image.
+- Download a precompiled binary from the [GitLab Releases](https://gitlab.com/kvmage/kvmage/-/releases) page.
+- Pull the container image from the GitLab Container Registry.
+- Clone the repository and compile from source.
 
-Precompiled binaries and readily available container images in GHCR and Docker Hub will be available in the future.
+### Precompiled Binaries
+
+Download the latest binary for your platform from the [Releases](https://gitlab.com/kvmage/kvmage/-/releases) page. Binaries are available for:
+
+- `kvmage-linux-amd64`
+- `kvmage-linux-arm64`
+- `kvmage-darwin-amd64`
+- `kvmage-darwin-arm64`
+
+```bash
+# Example: download and install on Linux amd64
+curl -fsSL -o kvmage https://gitlab.com/kvmage/kvmage/-/releases/permalink/latest/downloads/kvmage-linux-amd64
+chmod +x kvmage
+sudo mv kvmage /usr/local/bin/
+```
+
+### Container Image
+
+Container images are published to the GitLab Container Registry on every release. Available tags include the full version, major.minor, major, and `latest`.
+
+```bash
+docker pull registry.gitlab.com/kvmage/kvmage:latest
+```
+
+Or pin to a specific version:
+```bash
+docker pull registry.gitlab.com/kvmage/kvmage:2.2.11
+```
 
 ### Manual Installation
 
@@ -226,8 +254,6 @@ KVMage comes packaged as a container for easy image generation in CI/CD pipeline
 
 Since KVM requires kernel level access (hence the "K" in KVM) you need to pass through certain parameters from the container to the host.
 
-Below is an example of what you want to execute:
-
 ```bash
 sudo docker run --rm -it \
   --privileged \
@@ -235,7 +261,7 @@ sudo docker run --rm -it \
   -v ${PWD}:/kvmage \
   -v /var/run/libvirt:/var/run/libvirt \
   -v /var/lib/libvirt:/var/lib/libvirt \
-  kvmage:latest \
+  registry.gitlab.com/kvmage/kvmage:latest \
   --config kvmage.yml
 ```
 
