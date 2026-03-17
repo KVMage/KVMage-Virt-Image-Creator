@@ -1,17 +1,22 @@
 # KVMage: Virt Image Creator
 
-KVMage is an image creation software similar to something like "HashiCorp Packer" that is used to assist with and even fully automate the creation of qcow2 image for use with KVM. What makes KVMage uniique is that it is designed to leverage tools you may already have installed on a KVM hypervisor like virt-install and virt-customize. This is huge when you dont want to install new packages or programs and just want to work with what you have and since its written in Go, its super fast and runs and a single compiled binary on your system. 
+KVMage is an image creation tool for building and customizing qcow2 images for KVM. It works similarly to HashiCorp Packer but is designed to leverage tools already available on a KVM hypervisor such as `virt-install`, `virt-customize`, and `qemu-img`. There is nothing extra to install beyond KVMage itself — it is a single compiled Go binary that works with what you already have.
 
 ## Requirements
 
-The requirements are listed in the `REQUIREMENTS` file located in the root of the repo. KVMage performs a requirements check during install and at the beginning of command execution. You can also optionally perform a manual check using the `-R, --check-requirements` flag options.
+The full list of requirements is in the `REQUIREMENTS` file in the root of the repo. KVMage performs a requirements check during install and at the beginning of command execution. You can also run a manual check using the `-R, --check-requirements` flag.
 
-There are three primary required executables:
+Required executables:
 
-```bash
+```
+curl (or wget)
+lsof
+osinfo-query
+qemu-img
 virt-customize
 virt-install
-qemu-img
+virt-resize
+virsh
 ```
 
 ## Installation
@@ -62,29 +67,36 @@ docker build \
 
 ## How to Use KVMage
 
-KVMage provides a streamlined method for creating qcow images that is designed to feel like a natural extension to KVM by using existing commands and features already available to users with a deployed KVM hypervisor.
+KVMage provides a streamlined method for creating qcow2 images that is designed to feel like a natural extension to KVM by using existing tools already available on a KVM hypervisor.
 
-### KVMage Build Methods
+### Build Modes
 
-KVMage has two operating modes:
+KVMage has two build modes:
 
-- `install`: creates a brand-new image using an installation media (an ISO or URL) and a startup script to perform the automated unattended installation of the system.
+- `install`: Creates a brand-new image from installation media (ISO or URL) and an unattended install file. Supported install file types:
+  - **Kickstart** — for RHEL-based distros (Fedora, Alma, Rocky, CentOS, etc.)
+  - **Preseed** — for Debian-based distros (Debian, Ubuntu, etc.)
 
-> **NOTE**
-> The only supported methods for install currently are using a Kickstart file with RHEL-based distros such as Fedora, Alma, Rocky, etc...
+- `customize`: Takes an existing qcow2 image as a source and modifies it. You can upload files, run scripts, resize the disk, expand partitions, and set the hostname.
 
-- `customize`: creates an image using an existing qcow2 image as a source and modifies it with an identified script file (such as bash)
+### Operating Modes
 
-### KVMage Operating Modes
+KVMage supports two methods for providing configuration:
 
-KVMage supports two different methods for operating:
+- `run`: Use the `-r, --run` flag to pass all options as CLI arguments.
+- `config`: Use the `-f, --config` flag to provide a YAML config file. Config mode supports defining multiple image builds in a single file — builds are executed sequentially in the order they appear.
 
-- `run`: Use the `-r, --run` option with the `kvmage` command to perform setup using command line arguments and options.
-- `config`: Use the `-f, --config` option with the `kvmage` command to perform setup using a config file (YAML) where the options are defined. Config mode is particularly useful for managing multiple image builds as you can stack builds.
+### Variable Substitution
 
-### KVMage Install
+When using config mode, KVMage supports variable substitution in YAML config files using `${VAR}` or `$VAR` syntax. Variables are loaded from three sources in order of precedence (highest last):
 
-RUN Example:
+1. A `.env` file in the same directory as the config file (auto-loaded if present)
+2. A file specified with `--env-file`
+3. System environment variables
+
+### Install Mode
+
+RUN example:
 ```bash
 kvmage \
     --run \
@@ -94,10 +106,11 @@ kvmage \
     --image-size 100G \
     --install-file ks.cfg \
     --install-media almalinux9.5-minimal.iso \
-    --image-dest .
+    --image-dest . \
+    --firmware hybrid
 ```
 
-CONFIG Example:
+CONFIG example:
 ```yaml
 ---
 kvmage:
@@ -109,38 +122,65 @@ kvmage:
     install_file: ks.cfg
     install_media: almalinux9-minimal.iso
     image_dest: .
+    firmware: hybrid
 ```
 
-### KVMage Customize
+### Customize Mode
 
-RUN Example:
-
+RUN example:
 ```bash
 kvmage \
     --run \
     --customize \
     --image-name almalinux9-latest \
-    --os-var almalinux9 \
     --image-src almalinux9.qcow2 \
-    --image-dest $PWD \
-    --execute script.sh
+    --image-dest . \
+    --upload configs/ \
+    --execute setup.sh
 ```
 
+CONFIG example:
 ```yaml
 ---
 kvmage:
   almalinux9:
     image_name: almalinux9-latest
     virt_mode: customize
-    os_var: almalinux9
     image_src: almalinux9.qcow2
-    img_dest: .
-    execute: script.sh
+    image_dest: .
+    upload:
+      - configs/
+      - scripts/helper.sh
+    execute:
+      - setup.sh
 ```
-### KVMage Options
 
+### Upload and Execute
 
-```cfg
+In customize mode, you can upload files and directories into the guest image and execute scripts inside it:
+
+- **Upload** (`-U, --upload`): Copies files or directories into `/tmp/kvmage/` inside the guest. Accepts local paths (relative or absolute). Multiple items can be specified.
+- **Execute** (`-E, --execute`): Runs scripts inside the guest in the order specified. If an execute file was not already included in the upload list, it is automatically uploaded. Scripts run from `/tmp/kvmage/` and the directory is cleaned up after execution.
+
+### Firmware Options
+
+KVMage supports three firmware modes for install mode:
+
+- `bios` (default): Standard BIOS boot.
+- `efi`: UEFI boot with the Q35 machine type.
+- `hybrid`: BIOS and UEFI compatible boot using Q35 with UEFI firmware. Useful for images that need to boot in both BIOS and UEFI environments, such as bootc images.
+
+### Console Options
+
+For install mode, you can control how the VM console is presented:
+
+- `serial`: Headless serial console (`console=ttyS0`). Useful for automated builds without a display.
+- `graphical`: VNC console on `127.0.0.1`. Useful for debugging installs visually.
+- If unset, the default libvirt console behavior is used.
+
+### Options Reference
+
+```
 Usage:
   kvmage [--run | --config] [flags]
 
@@ -148,24 +188,26 @@ Execution Modes (required):
   -r, --run                     Use CLI arguments directly
   -f, --config <file>           Use a YAML config file
 
-Installation Methods (required):
+Build Modes (required with --run):
   -i, --install                 Install mode (create image from ISO)
   -c, --customize               Customize mode (modify existing image)
 
 Image Options:
   -n, --image-name <name>       Name of the image
-  -o, --os-var <os>             OS variant (use `osinfo-query os`)
+  -o, --os-var <os>             OS variant (use osinfo-query os)
   -s, --image-size <size>       Image size (e.g., 100G), expands image in customize mode
   -P, --image-part <device>     Partition to expand (e.g., /dev/sda1)
-  -k, --install-file <file>     Path to Install file
-  -l, --install-media <path>    Install media path or URL
+  -k, --install-file <file>     Path to Kickstart or Preseed file
+  -j, --install-media <path>    Install media path or URL (ISO or install tree)
   -S, --image-src <file>        Source QCOW2 image (customize mode)
   -D, --image-dest <file>       Destination QCOW2 image
   -H, --hostname <name>         Hostname to set inside the image (optional)
-  -U, --upload <path>              Files or directories to upload (temp)
-  -E, --execute <file>             Files to execute scripts (in order)
+  -U, --upload <path>           Files or directories to upload (temp)
+  -E, --execute <file>          Scripts to execute in order
   -W, --network <iface>         Virtual network name (optional)
-  -m, --firmware <type>         Firmware type: bios (default) or efi
+  -m, --firmware <type>         Firmware type: bios (default), efi, or hybrid
+      --console <type>          Console type: serial or graphical (optional)
+      --env-file <file>         Path to env file for variable substitution
 
 Global Options:
   -h, --help                    Show help and exit
@@ -173,6 +215,7 @@ Global Options:
       --verbose-level <n>       Set verbosity level explicitly (0-3)
   -q, --quiet                   Suppress all output
   -V, --version                 Show version info for KVMage and tools
+  -R, --check-requirements      Check system requirements and exit
   -u, --uninstall               Uninstall KVMage from /usr/local/bin
   -X, --cleanup                 Run cleanup mode to remove orphaned kvmage temp files
 ```
