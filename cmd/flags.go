@@ -49,5 +49,5 @@ func init() {
         rootCmd.Flags().StringSliceVarP(&opts.Execute, "execute", "E", []string{}, "Files to execute scripts (in order)")
         rootCmd.Flags().StringVarP(&opts.Network, "network", "W", "", "Network interface (optional)")
         rootCmd.Flags().StringVarP(&opts.Console, "console", "", "", "Console type: serial or graphical (optional)")
-        rootCmd.Flags().StringVarP(&opts.Firmware, "firmware", "m", "bios", "Firmware type: bios or efi")
+        rootCmd.Flags().StringVarP(&opts.Firmware, "firmware", "m", "bios", "Firmware type: bios, efi, or hybrid")
 }
