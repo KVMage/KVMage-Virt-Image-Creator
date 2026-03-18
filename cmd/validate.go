@@ -58,8 +58,8 @@ func ValidateOptions(opts *Options) error {
 		return fmt.Errorf("invalid console value: must be 'serial', 'graphical', or unset")
 	}
 
-	if opts.Firmware != "" && opts.Firmware != "bios" && opts.Firmware != "efi" {
-		return fmt.Errorf("invalid firmware value: must be 'bios', 'efi', or unset")
+	if opts.Firmware != "" && opts.Firmware != "bios" && opts.Firmware != "efi" && opts.Firmware != "hybrid" {
+		return fmt.Errorf("invalid firmware value: must be 'bios', 'efi', 'hybrid', or unset")
 	}
 
 	return nil

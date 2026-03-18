@@ -1,0 +1,94 @@
+stages:
+  - build
+  - release
+  - docker
+
+variables:
+  GOIMAGE: golang:1.24
+  VERSION_FILE: VERSION
+
+# --- Binary Build ---
+
+build-binaries:
+  stage: build
+  image: ${GOIMAGE}
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - VERSION=$(cat ${VERSION_FILE})
+    - REQUIREMENTS=$(base64 -w 0 REQUIREMENTS)
+    - mkdir -p dist
+    - |
+      for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
+        GOOS="${target%/*}"
+        GOARCH="${target#*/}"
+        OUTPUT="dist/kvmage-${GOOS}-${GOARCH}"
+        echo "Building ${OUTPUT}..."
+        GOOS=${GOOS} GOARCH=${GOARCH} go build \
+          -ldflags "-X kvmage/cmd.Version=${VERSION} -X kvmage/cmd.RequirementsB64=${REQUIREMENTS}" \
+          -o "${OUTPUT}" .
+      done
+  artifacts:
+    paths:
+      - dist/
+
+# --- GitLab Release with Binaries ---
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  needs:
+    - build-binaries
+  script:
+    - VERSION=$(cat ${VERSION_FILE})
+    - MAJOR_MINOR="${VERSION%.*}"
+    - echo "Creating release v${VERSION}"
+  release:
+    tag_name: "v${VERSION}"
+    name: "KVMage v${VERSION}"
+    description: "KVMage release v${VERSION}"
+    assets:
+      links:
+        - name: kvmage-linux-amd64
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/kvmage-linux-amd64"
+        - name: kvmage-linux-arm64
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/kvmage-linux-arm64"
+        - name: kvmage-darwin-amd64
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/kvmage-darwin-amd64"
+        - name: kvmage-darwin-arm64
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/kvmage-darwin-arm64"
+
+# --- Docker Images ---
+
+docker:
+  stage: docker
+  image: docker:latest
+  services:
+    - docker:dind
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    REGISTRY: ${CI_REGISTRY_IMAGE}
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  script:
+    - VERSION=$(cat ${VERSION_FILE})
+    - MAJOR_MINOR="${VERSION%.*}"
+    - MAJOR="${VERSION%%.*}"
+    - BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+    - |
+      docker build \
+        --build-arg KVMAGE_VERSION="${VERSION}" \
+        --build-arg BUILD_DATE="${BUILD_DATE}" \
+        --build-arg KVMAGE_BRANCH="${CI_DEFAULT_BRANCH}" \
+        -t "${REGISTRY}:${VERSION}" \
+        -t "${REGISTRY}:${MAJOR_MINOR}" \
+        -t "${REGISTRY}:${MAJOR}" \
+        -t "${REGISTRY}:latest" \
+        .
+    - docker push "${REGISTRY}:${VERSION}"
+    - docker push "${REGISTRY}:${MAJOR_MINOR}"
+    - docker push "${REGISTRY}:${MAJOR}"
+    - docker push "${REGISTRY}:latest"

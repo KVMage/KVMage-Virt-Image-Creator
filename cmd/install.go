@@ -39,10 +39,14 @@ func RunInstall(opts *Options, tempName, tempPath string) error {
 		PrintVerbose(2, "Using default network")
 	}
 
-	if opts.Firmware == "efi" {
+	switch opts.Firmware {
+	case "efi":
 		args = append(args, "--machine", "q35", "--boot", "uefi")
 		PrintVerbose(2, "Firmware: efi (UEFI boot with Q35 chipset)")
-	} else {
+	case "hybrid":
+		args = append(args, "--machine", "q35", "--boot", "uefi")
+		PrintVerbose(2, "Firmware: hybrid (BIOS + UEFI compatible)")
+	default:
 		PrintVerbose(2, "Firmware: bios (default)")
 	}
 

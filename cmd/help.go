@@ -33,7 +33,7 @@ func CustomHelp(cmd *cobra.Command, args []string) {
 	Print("  -U, --upload <path>		   	Files or directories to upload (temp)")
 	Print("  -E, --execute <file>		   	Files to execute scripts (in order)")
 	Print("  -W, --network <iface>         	Virtual network name (optional)")
-	Print("  -m, --firmware <type>         	Firmware type: bios (default) or efi")
+	Print("  -m, --firmware <type>         	Firmware type: bios (default), efi, or hybrid")
 	Print("      --env-file <file>         	Path to env file for variable substitution")
 	Print("")
 	Print("Global Options:")

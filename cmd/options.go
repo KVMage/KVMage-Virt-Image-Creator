@@ -23,7 +23,7 @@ type Options struct {
 	Hostname         	string   	`yaml:"hostname"`                  	// Optional
 	Network          	string   	`yaml:"network"`                   	// Optional virtual network
 	Console          	string		`yaml:"console"`                   	// "serial", or "graphical"
-	Firmware         	string		`yaml:"firmware"`                  	// "bios" or "efi" (default: bios)
+	Firmware         	string		`yaml:"firmware"`                  	// "bios", "efi", or "hybrid" (default: bios)
 }
 
 func resolvePath(path string) string {
