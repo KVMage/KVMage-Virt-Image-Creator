@@ -6,7 +6,7 @@ kvmage:
     os_var: debiantesting
     image_size: 100G
     install_file: ./preseed.cfg
-    install_media: ./debain.iso
+    install_media: ./debian.iso
     image_dest: .
     hostname: debian
     firmware: efi
