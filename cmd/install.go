@@ -82,6 +82,14 @@ func RunInstall(opts *Options, tempName, tempPath string) error {
 			"--noautoconsole",
 		)
 		PrintVerbose(2, "Console type: graphical")
+	case "dual":
+		args = append(args,
+			"--graphics", "vnc,listen=127.0.0.1",
+			"--console", "pty,target_type=serial",
+			"--noautoconsole",
+		)
+		extraArgs += " console=tty0 console=ttyS0"
+		PrintVerbose(2, "Console type: dual (serial + graphical)")
 	default:
 		PrintVerbose(2, "Console type: (none specified)")
 	}

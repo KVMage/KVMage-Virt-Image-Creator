@@ -204,6 +204,7 @@ For install mode, you can control how the VM console is presented:
 
 - `serial`: Headless serial console (`console=ttyS0`). Useful for automated builds without a display.
 - `graphical`: VNC console on `127.0.0.1`. Useful for debugging installs visually.
+- `dual`: Both serial and graphical consoles simultaneously. VNC is available for graphical access while serial console is accessible via `virsh console`. Useful when you want to monitor an install via serial but also have graphical access available.
 - If unset, the default libvirt console behavior is used.
 
 ### Options Reference
@@ -234,7 +235,7 @@ Image Options:
   -E, --execute <file>          Scripts to execute in order
   -W, --network <iface>         Virtual network name (optional)
   -m, --firmware <type>         Firmware type: bios (default), efi, or hybrid
-      --console <type>          Console type: serial or graphical (optional)
+      --console <type>          Console type: serial, graphical, or dual (optional)
       --env-file <file>         Path to env file for variable substitution
 
 Global Options:
