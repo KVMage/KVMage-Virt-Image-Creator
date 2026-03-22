@@ -8,6 +8,7 @@ import (
 )
 
 var TempNetworkName string
+var kvmageCreatedNetwork bool
 
 func listLibvirtNetworks() ([]string, error) {
 	out, err := exec.Command("virsh", "net-list", "--all", "--name").Output()
@@ -24,19 +25,41 @@ func listLibvirtNetworks() ([]string, error) {
 	return networks, nil
 }
 
-func listLibvirtBridges() ([]string, error) {
-	out, err := exec.Command("virsh", "net-list", "--all").Output()
-	if err != nil {
-		return nil, fmt.Errorf("failed to list libvirt networks: %w", err)
-	}
+func listSystemBridges() []string {
 	var bridges []string
-	for _, line := range strings.Split(string(out), "\n") {
-		fields := strings.Fields(line)
-		if len(fields) >= 3 && fields[0] != "Name" && !strings.HasPrefix(line, "-") {
-			bridges = append(bridges, fields[1])
+	// Get bridges from network interfaces on the system
+	ifaces, err := net.Interfaces()
+	if err == nil {
+		for _, iface := range ifaces {
+			bridges = append(bridges, iface.Name)
 		}
 	}
-	return bridges, nil
+	// Also get bridge names from libvirt network XML definitions
+	networks, _ := listLibvirtNetworks()
+	for _, name := range networks {
+		out, err := exec.Command("virsh", "net-dumpxml", name).Output()
+		if err != nil {
+			continue
+		}
+		xml := string(out)
+		for _, line := range strings.Split(xml, "\n") {
+			line = strings.TrimSpace(line)
+			if strings.Contains(line, "<bridge name=") {
+				nameStart := strings.Index(line, "name='")
+				if nameStart == -1 {
+					nameStart = strings.Index(line, "name=\"")
+				}
+				if nameStart != -1 {
+					nameStart += 6
+					nameEnd := strings.IndexAny(line[nameStart:], "'\"")
+					if nameEnd != -1 {
+						bridges = append(bridges, line[nameStart:nameStart+nameEnd])
+					}
+				}
+			}
+		}
+	}
+	return bridges
 }
 
 func usedSubnets() ([]string, error) {
@@ -71,26 +94,6 @@ func usedSubnets() ([]string, error) {
 	return subnets, nil
 }
 
-func findAvailableNetworkName(existing []string) string {
-	name := "kvmage"
-	for i := 0; ; i++ {
-		candidate := name
-		if i > 0 {
-			candidate = fmt.Sprintf("%s-%d", name, i)
-		}
-		found := false
-		for _, n := range existing {
-			if n == candidate {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return candidate
-		}
-	}
-}
-
 func findAvailableBridge(existing []string) string {
 	for i := 0; ; i++ {
 		candidate := fmt.Sprintf("virbr%d", i)
@@ -102,11 +105,7 @@ func findAvailableBridge(existing []string) string {
 			}
 		}
 		if !found {
-			// Also check if the interface exists on the system
-			_, err := net.InterfaceByName(candidate)
-			if err != nil {
-				return candidate
-			}
+			return candidate
 		}
 	}
 }
@@ -152,9 +151,9 @@ func EnsureKvmageNetwork() (string, error) {
 		return "", err
 	}
 
-	// Check if an existing kvmage network is already running
+	// Check if an existing kvmage network is already active — reuse it
 	for _, n := range networks {
-		if strings.HasPrefix(n, "kvmage") {
+		if strings.HasPrefix(n, "kvmage-") {
 			out, err := exec.Command("virsh", "net-info", n).Output()
 			if err == nil && strings.Contains(string(out), "Active:         yes") {
 				PrintVerbose(2, "Using existing kvmage network: %s", n)
@@ -164,17 +163,15 @@ func EnsureKvmageNetwork() (string, error) {
 		}
 	}
 
-	bridges, err := listLibvirtBridges()
-	if err != nil {
-		return "", err
-	}
+	// No active kvmage network — create one using the same random string as TempImageName
+	netName := fmt.Sprintf("kvmage-%s", strings.TrimPrefix(TempImageName, "kvmage-"))
 
+	bridges := listSystemBridges()
 	subnets, err := usedSubnets()
 	if err != nil {
 		return "", err
 	}
 
-	netName := findAvailableNetworkName(networks)
 	bridgeName := findAvailableBridge(bridges)
 	gateway, rangeStart, rangeEnd := findAvailableSubnet(subnets)
 
@@ -207,11 +204,13 @@ func EnsureKvmageNetwork() (string, error) {
 
 	PrintVerbose(1, "Created kvmage network: %s", netName)
 	TempNetworkName = netName
+	kvmageCreatedNetwork = true
 	return netName, nil
 }
 
 func CleanupKvmageNetwork() {
-	if TempNetworkName == "" {
+	// Only clean up networks that kvmage created this session
+	if !kvmageCreatedNetwork || TempNetworkName == "" {
 		return
 	}
 
@@ -231,6 +230,7 @@ func CleanupKvmageNetwork() {
 	exec.Command("virsh", "net-destroy", TempNetworkName).Run()
 	exec.Command("virsh", "net-undefine", TempNetworkName).Run()
 	TempNetworkName = ""
+	kvmageCreatedNetwork = false
 }
 
 func cleanupOrphanedNetworks() {
@@ -239,7 +239,7 @@ func cleanupOrphanedNetworks() {
 		return
 	}
 	for _, name := range networks {
-		if !strings.HasPrefix(name, "kvmage") {
+		if !strings.HasPrefix(name, "kvmage-") {
 			continue
 		}
 		PrintVerbose(2, "Removing orphaned kvmage network: %s", name)
