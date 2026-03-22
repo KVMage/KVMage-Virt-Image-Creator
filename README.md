@@ -198,6 +198,18 @@ KVMage supports three firmware modes for install mode:
 - `efi`: UEFI boot with the Q35 machine type.
 - `hybrid`: BIOS and UEFI compatible boot using Q35 with UEFI firmware. Useful for images that need to boot in both BIOS and UEFI environments, such as bootc images.
 
+### Networking
+
+In install mode, kvmage needs a libvirt network to provide the VM with network access during installation.
+
+- If `--network` (`-W`) is specified, kvmage uses that network directly.
+- If no network is specified, kvmage automatically manages its own network:
+  1. Checks for an existing active `kvmage-*` network and reuses it.
+  2. If none exists, creates a new NAT network named `kvmage-<id>` with an automatically selected bridge name and subnet that avoids conflicts with existing networks and interfaces.
+  3. The network is destroyed and undefined when the build completes and no other kvmage VMs are running.
+
+Orphaned kvmage networks from interrupted builds can be cleaned up with `kvmage --cleanup`.
+
 ### Console Options
 
 For install mode, you can control how the VM console is presented:
