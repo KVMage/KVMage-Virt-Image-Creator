@@ -50,6 +50,8 @@ func CleanupArtifacts() {
 	if TempImageName != "" {
 		removeTempVM(TempImageName)
 	}
+
+	CleanupKvmageNetwork()
 }
 
 func isSafeTempPath(path string) bool {
@@ -209,6 +211,9 @@ func CleanupOrphanedTempFiles() {
 		removeTempVM(vm)
 		Print("Removed VM: %s", vm)
 	}
+
+	// Clean up any orphaned kvmage networks
+	cleanupOrphanedNetworks()
 }
 
 func findOrphanedVMs() []string {

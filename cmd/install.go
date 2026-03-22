@@ -35,8 +35,12 @@ func RunInstall(opts *Options, tempName, tempPath string) error {
 		args = append(args, "--network", fmt.Sprintf("network=%s,model=virtio", opts.Network))
 		PrintVerbose(2, "Using custom network: %s", opts.Network)
 	} else {
-		args = append(args, "--network", "network=default,model=virtio")
-		PrintVerbose(2, "Using default network")
+		netName, err := EnsureKvmageNetwork()
+		if err != nil {
+			return fmt.Errorf("failed to set up kvmage network: %w", err)
+		}
+		args = append(args, "--network", fmt.Sprintf("network=%s,model=virtio", netName))
+		PrintVerbose(2, "Using kvmage network: %s", netName)
 	}
 
 	switch opts.Firmware {

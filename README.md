@@ -53,7 +53,7 @@ docker pull registry.gitlab.com/kvmage/kvmage:latest
 
 Or pin to a specific version:
 ```bash
-docker pull registry.gitlab.com/kvmage/kvmage:2.2.11
+docker pull registry.gitlab.com/kvmage/kvmage:2.3.1
 ```
 
 ### Manual Installation

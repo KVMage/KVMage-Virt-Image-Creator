@@ -34,6 +34,7 @@ func CustomHelp(cmd *cobra.Command, args []string) {
 	Print("  -E, --execute <file>		   	Files to execute scripts (in order)")
 	Print("  -W, --network <iface>         	Virtual network name (optional)")
 	Print("  -m, --firmware <type>         	Firmware type: bios (default), efi, or hybrid")
+	Print("      --console <type>          	Console type: serial, graphical, or dual (optional)")
 	Print("      --env-file <file>         	Path to env file for variable substitution")
 	Print("")
 	Print("Global Options:")

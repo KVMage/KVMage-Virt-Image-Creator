@@ -43,22 +43,16 @@ release:
     - build-binaries
   script:
     - VERSION=$(cat ${VERSION_FILE})
-    - MAJOR_MINOR="${VERSION%.*}"
     - echo "Creating release v${VERSION}"
-  release:
-    tag_name: "v${VERSION}"
-    name: "KVMage v${VERSION}"
-    description: "KVMage release v${VERSION}"
-    assets:
-      links:
-        - name: kvmage-linux-amd64
-          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/kvmage-linux-amd64"
-        - name: kvmage-linux-arm64
-          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/kvmage-linux-arm64"
-        - name: kvmage-darwin-amd64
-          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/kvmage-darwin-amd64"
-        - name: kvmage-darwin-arm64
-          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/dist/kvmage-darwin-arm64"
+    - |
+      release-cli create \
+        --name "KVMage v${VERSION}" \
+        --tag-name "v${VERSION}" \
+        --description "KVMage release v${VERSION}" \
+        --assets-link "{\"name\":\"kvmage-linux-amd64\",\"url\":\"${CI_PROJECT_URL}/-/jobs/artifacts/${CI_DEFAULT_BRANCH}/raw/dist/kvmage-linux-amd64?job=build-binaries\"}" \
+        --assets-link "{\"name\":\"kvmage-linux-arm64\",\"url\":\"${CI_PROJECT_URL}/-/jobs/artifacts/${CI_DEFAULT_BRANCH}/raw/dist/kvmage-linux-arm64?job=build-binaries\"}" \
+        --assets-link "{\"name\":\"kvmage-darwin-amd64\",\"url\":\"${CI_PROJECT_URL}/-/jobs/artifacts/${CI_DEFAULT_BRANCH}/raw/dist/kvmage-darwin-amd64?job=build-binaries\"}" \
+        --assets-link "{\"name\":\"kvmage-darwin-arm64\",\"url\":\"${CI_PROJECT_URL}/-/jobs/artifacts/${CI_DEFAULT_BRANCH}/raw/dist/kvmage-darwin-arm64?job=build-binaries\"}"
 
 # --- Docker Images ---
 
