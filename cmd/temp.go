@@ -82,7 +82,8 @@ func resolveInstallMedia(src string) (string, error) {
 				return "", fmt.Errorf("neither curl nor wget is installed")
 			}
 
-			PrintVerbose(2, "Downloading ISO from %s using %s", src, downloader)
+			Print("Downloading install media: %s", src)
+			PrintVerbose(2, "Downloader: %s", downloader)
 			PrintVerbose(2, "Download destination: %s", dest)
 
 			var cmd *exec.Cmd
