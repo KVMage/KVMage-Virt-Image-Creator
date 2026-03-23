@@ -87,9 +87,9 @@ func resolveInstallMedia(src string) (string, error) {
 
 			var cmd *exec.Cmd
 			if downloader == "curl" {
-				cmd = exec.Command("curl", "-L", "-v", "-o", dest, src)
+				cmd = exec.Command("curl", "-L", "--progress-bar", "-o", dest, src)
 			} else {
-				cmd = exec.Command("wget", "-v", "-O", dest, src)
+				cmd = exec.Command("wget", "--progress=bar:force", "-O", dest, src)
 			}
 
 			cmd.Stdout = os.Stdout
