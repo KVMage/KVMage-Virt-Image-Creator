@@ -54,8 +54,8 @@ func ValidateOptions(opts *Options) error {
 		return fmt.Errorf("%s mode is missing required fields: %v", mode, missing)
 	}
 
-	if opts.Console != "" && opts.Console != "serial" && opts.Console != "graphical" && opts.Console != "dual" {
-		return fmt.Errorf("invalid console value: must be 'serial', 'graphical', 'dual', or unset")
+	if opts.Console != "" && opts.Console != "serial" && opts.Console != "graphical" {
+		return fmt.Errorf("invalid console value: must be 'serial', 'graphical', or unset")
 	}
 
 	if opts.Firmware != "" && opts.Firmware != "bios" && opts.Firmware != "efi" && opts.Firmware != "hybrid" {
