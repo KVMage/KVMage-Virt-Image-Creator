@@ -65,45 +65,9 @@ func CreateTempImage(opts *Options) (string, string, error) {
 }
 
 func resolveInstallMedia(src string) (string, error) {
+	// Remote URLs are passed directly to virt-install which handles them natively
 	if strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://") {
-		if strings.HasSuffix(strings.ToLower(src), ".iso") {
-			ext := filepath.Ext(src)
-			if ext == "" {
-				ext = ".iso"
-			}
-			dest := filepath.Join(tempDir, fmt.Sprintf("%s-iso.temp%s", TempImageName, ext))
-
-			var downloader string
-			if _, err := exec.LookPath("curl"); err == nil {
-				downloader = "curl"
-			} else if _, err := exec.LookPath("wget"); err == nil {
-				downloader = "wget"
-			} else {
-				return "", fmt.Errorf("neither curl nor wget is installed")
-			}
-
-			Print("Downloading install media: %s", src)
-			PrintVerbose(2, "Downloader: %s", downloader)
-			PrintVerbose(2, "Download destination: %s", dest)
-
-			var cmd *exec.Cmd
-			if downloader == "curl" {
-				cmd = exec.Command("curl", "-L", "--progress-bar", "-o", dest, src)
-			} else {
-				cmd = exec.Command("wget", "--progress=bar:force", "-O", dest, src)
-			}
-
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-
-			if err := cmd.Run(); err != nil {
-				return "", fmt.Errorf("failed to download remote ISO: %w", err)
-			}
-
-			return dest, nil
-		} else {
-			return src, nil
-		}
+		return src, nil
 	}
 
 	info, err := os.Stat(src)
