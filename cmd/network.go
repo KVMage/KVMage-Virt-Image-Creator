@@ -183,10 +183,6 @@ func EnsureKvmageNetwork() (string, error) {
   <name>%s</name>
   <bridge name='%s'/>
   <forward mode='nat'/>
-  <dns enable='yes'>
-    <forwarder addr='8.8.8.8'/>
-    <forwarder addr='8.8.4.4'/>
-  </dns>
   <ip address='%s' netmask='255.255.255.0'>
     <dhcp>
       <range start='%s' end='%s'/>
