@@ -65,8 +65,43 @@ func CreateTempImage(opts *Options) (string, string, error) {
 }
 
 func resolveInstallMedia(src string) (string, error) {
-	// Remote URLs are passed directly to virt-install which handles them natively
 	if strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://") {
+		// Remote ISO files must be downloaded locally — virt-install --location
+		// only supports remote install trees, not remote ISOs
+		if strings.HasSuffix(strings.ToLower(src), ".iso") {
+			dest := filepath.Join(tempDir, fmt.Sprintf("%s-iso.temp.iso", TempImageName))
+
+			var downloader string
+			if _, err := exec.LookPath("curl"); err == nil {
+				downloader = "curl"
+			} else if _, err := exec.LookPath("wget"); err == nil {
+				downloader = "wget"
+			} else {
+				return "", fmt.Errorf("neither curl nor wget is installed")
+			}
+
+			Print("Downloading install media: %s", src)
+			PrintVerbose(2, "Downloader: %s", downloader)
+			PrintVerbose(2, "Download destination: %s", dest)
+
+			var cmd *exec.Cmd
+			if downloader == "curl" {
+				cmd = exec.Command("curl", "-L", "--progress-bar", "-o", dest, src)
+			} else {
+				cmd = exec.Command("wget", "--progress=bar:force", "-O", dest, src)
+			}
+
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+
+			if err := cmd.Run(); err != nil {
+				return "", fmt.Errorf("failed to download remote ISO: %w", err)
+			}
+
+			return dest, nil
+		}
+
+		// Remote install tree URLs are passed directly to virt-install
 		return src, nil
 	}
 
@@ -141,10 +176,14 @@ func CopyInputFilesToTempDir(opts *Options) error {
 
 		if strings.HasPrefix(resolved, "http://") || strings.HasPrefix(resolved, "https://") {
 			TempInstallMedia = resolved
-			PrintVerbose(2, "Using remote install media: %s", TempInstallMedia)
+			PrintVerbose(2, "Using remote install tree: %s", TempInstallMedia)
 		} else if info, err := os.Stat(resolved); err == nil && info.IsDir() {
 			TempInstallMedia = resolved
 			PrintVerbose(2, "Using local install tree: %s", TempInstallMedia)
+		} else if strings.HasPrefix(resolved, filepath.Join(tempDir, "kvmage-")) {
+			// Already a kvmage temp file (downloaded ISO) — use directly
+			TempInstallMedia = resolved
+			PrintVerbose(2, "Using downloaded ISO: %s", TempInstallMedia)
 		} else {
 			if TempInstallMedia, err = copyToTemp(resolved, "iso"); err != nil {
 				return fmt.Errorf("install media copy failed: %w", err)
