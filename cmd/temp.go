@@ -82,7 +82,8 @@ func resolveInstallMedia(src string) (string, error) {
 				return "", fmt.Errorf("neither curl nor wget is installed")
 			}
 
-			PrintVerbose(2, "Downloading ISO from %s using %s", src, downloader)
+			Print("Downloading install media: %s", src)
+			PrintVerbose(2, "Downloader: %s", downloader)
 			PrintVerbose(2, "Download destination: %s", dest)
 
 			var cmd *exec.Cmd
@@ -180,6 +181,9 @@ func CopyInputFilesToTempDir(opts *Options) error {
 		} else if info, err := os.Stat(resolved); err == nil && info.IsDir() {
 			TempInstallMedia = resolved
 			PrintVerbose(2, "Using local install tree: %s", TempInstallMedia)
+		} else if strings.Contains(resolved, TempImageName) {
+			TempInstallMedia = resolved
+			PrintVerbose(2, "Using downloaded ISO: %s", TempInstallMedia)
 		} else {
 			if TempInstallMedia, err = copyToTemp(resolved, "iso"); err != nil {
 				return fmt.Errorf("install media copy failed: %w", err)
