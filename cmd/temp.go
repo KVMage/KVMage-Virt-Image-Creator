@@ -66,10 +66,12 @@ func CreateTempImage(opts *Options) (string, string, error) {
 
 func resolveInstallMedia(src string) (string, error) {
 	if strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://") {
-		// Remote ISO files must be downloaded locally — virt-install --location
-		// only supports remote install trees, not remote ISOs
 		if strings.HasSuffix(strings.ToLower(src), ".iso") {
-			dest := filepath.Join(tempDir, fmt.Sprintf("%s-iso.temp.iso", TempImageName))
+			ext := filepath.Ext(src)
+			if ext == "" {
+				ext = ".iso"
+			}
+			dest := filepath.Join(tempDir, fmt.Sprintf("%s-iso.temp%s", TempImageName, ext))
 
 			var downloader string
 			if _, err := exec.LookPath("curl"); err == nil {
@@ -99,10 +101,9 @@ func resolveInstallMedia(src string) (string, error) {
 			}
 
 			return dest, nil
+		} else {
+			return src, nil
 		}
-
-		// Remote install tree URLs are passed directly to virt-install
-		return src, nil
 	}
 
 	info, err := os.Stat(src)
@@ -176,12 +177,11 @@ func CopyInputFilesToTempDir(opts *Options) error {
 
 		if strings.HasPrefix(resolved, "http://") || strings.HasPrefix(resolved, "https://") {
 			TempInstallMedia = resolved
-			PrintVerbose(2, "Using remote install tree: %s", TempInstallMedia)
+			PrintVerbose(2, "Using remote install media: %s", TempInstallMedia)
 		} else if info, err := os.Stat(resolved); err == nil && info.IsDir() {
 			TempInstallMedia = resolved
 			PrintVerbose(2, "Using local install tree: %s", TempInstallMedia)
-		} else if strings.HasPrefix(resolved, filepath.Join(tempDir, "kvmage-")) {
-			// Already a kvmage temp file (downloaded ISO) — use directly
+		} else if strings.Contains(resolved, TempImageName) {
 			TempInstallMedia = resolved
 			PrintVerbose(2, "Using downloaded ISO: %s", TempInstallMedia)
 		} else {
